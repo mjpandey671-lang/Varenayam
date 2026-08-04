@@ -55,7 +55,6 @@ export default function Navigation() {
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Shop', path: '/shop' },
-    { label: 'Lookbook', path: '/lookbook' },
     { label: 'About', path: '/about' },
     { label: 'Size Guide', path: '/size-guide' },
     { label: 'Contact', path: '/contact' },
@@ -154,7 +153,7 @@ export default function Navigation() {
                 to={user ? "/account" : "/login"}
                 className="text-white/80 hover:text-white font-medium text-sm transition-colors duration-300"
               >
-                {user ? "Account" : "Login"}
+                {user ? user.name.split(' ')[0].toUpperCase() : "Login"}
               </Link>
               {!user && (
                 <Link

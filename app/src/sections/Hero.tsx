@@ -77,12 +77,6 @@ export default function Hero() {
           >
             Shop Collection
           </Link>
-          <Link 
-            to="/lookbook" 
-            className="bg-black/50 backdrop-blur-md border border-white/20 text-white font-bold text-sm md:text-base tracking-[0.15em] uppercase px-10 py-4 rounded-full hover:bg-white/10 hover:border-white transition-all duration-300"
-          >
-            View Lookbook
-          </Link>
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import type { Product, CartItem, User, Category } from '@/types';
+import type { Product, CartItem, User, Category, Order, Address } from '@/types';
 
 interface StoreState {
   cart: CartItem[];
@@ -7,6 +7,8 @@ interface StoreState {
   products: Product[];
   categories: Category[];
   users: User[];
+  orders: Order[];
+  addresses: Address[];
   user: User | null;
   isCartOpen: boolean;
   isSidebarOpen: boolean;
@@ -26,8 +28,11 @@ interface StoreActions {
   login: (user: User) => void;
   logout: () => void;
   addProduct: (product: Product) => void;
-  updateProduct: (id: string, updates: Partial<Product>) => void;
-  deleteProduct: (id: string) => void;
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  updateOrderStatus: (id: string, status: string) => Promise<void>;
+  fetchProducts: () => Promise<void>;
+  fetchOrders: () => Promise<void>;
   addCategory: (category: Category) => void;
   deleteCategory: (id: string) => void;
   addUser: (user: User) => void;
@@ -35,6 +40,8 @@ interface StoreActions {
   cartTotal: number;
   cartCount: number;
 }
+
+const API_URL = 'http://localhost:5000/api';
 
 const StoreContext = createContext<(StoreState & StoreActions) | null>(null);
 
@@ -163,30 +170,23 @@ const initialUsers: User[] = [
   { id: '4', name: 'Sneha Gupta', email: 'sneha.g@example.com', role: 'Customer', joinDate: '2024-02-28' },
 ];
 
+const initialAddresses: Address[] = [
+  { id: '1', name: 'Home', street: '123 Main St', city: 'Mumbai', state: 'MH', zip: '400001', isDefault: true },
+  { id: '2', name: 'Work', street: '456 Tech Park', city: 'Pune', state: 'MH', zip: '411001', isDefault: false },
+];
+
+const initialOrders: Order[] = [
+  { id: 'ORD-001', date: '2026-07-28', status: 'Delivered', total: 4999, shippingAddress: initialAddresses[0], items: [] },
+  { id: 'ORD-002', date: '2026-08-01', status: 'Processing', total: 8999, shippingAddress: initialAddresses[1], items: [] },
+];
+
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('varenayam_products');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
-    }
-    return initialProducts;
-  });
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [users, setUsers] = useState<User[]>(initialUsers);
 
-  const [categories, setCategories] = useState<Category[]>(() => {
-    const saved = localStorage.getItem('varenayam_categories');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
-    }
-    return initialCategories;
-  });
-
-  const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('varenayam_users');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
-    }
-    return initialUsers;
-  });
+  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [addresses, setAddresses] = useState<Address[]>(initialAddresses);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
@@ -195,29 +195,93 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Persist to localStorage when changed
-  useEffect(() => {
-    localStorage.setItem('varenayam_products', JSON.stringify(products));
-  }, [products]);
-
-  useEffect(() => {
-    localStorage.setItem('varenayam_categories', JSON.stringify(categories));
-  }, [categories]);
-
-  useEffect(() => {
-    localStorage.setItem('varenayam_users', JSON.stringify(users));
-  }, [users]);
-
-  const addProduct = useCallback((product: Product) => {
-    setProducts(prev => [...prev, product]);
+  const fetchProducts = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/products`);
+      if (res.ok) {
+        const data = await res.json();
+        setProducts(data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch products', e);
+    }
   }, []);
 
-  const updateProduct = useCallback((id: string, updates: Partial<Product>) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  const fetchOrders = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/orders`);
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch orders', e);
+    }
   }, []);
 
-  const deleteProduct = useCallback((id: string) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
+  // Fetch on mount
+  useEffect(() => {
+    fetchProducts();
+    fetchOrders();
+  }, [fetchProducts, fetchOrders]);
+
+  const addProduct = useCallback(async (product: Product) => {
+    try {
+      const res = await fetch(`${API_URL}/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(product)
+      });
+      if (res.ok) {
+        const newProduct = await res.json();
+        setProducts(prev => [...prev, newProduct]);
+      }
+    } catch (e) {
+      console.error('Add product failed', e);
+    }
+  }, []);
+
+  const updateProduct = useCallback(async (id: string, updates: Partial<Product>) => {
+    try {
+      const res = await fetch(`${API_URL}/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setProducts(prev => prev.map(p => p.id === id ? updated : p));
+      }
+    } catch (e) {
+      console.error('Update product failed', e);
+    }
+  }, []);
+
+  const deleteProduct = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setProducts(prev => prev.filter(p => p.id !== id));
+      }
+    } catch (e) {
+      console.error('Delete product failed', e);
+    }
+  }, []);
+
+  const updateOrderStatus = useCallback(async (id: string, status: string) => {
+    try {
+      const res = await fetch(`${API_URL}/orders/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        const updatedOrder = await res.json();
+        setOrders(prev => prev.map(o => o.id === id ? updatedOrder : o));
+      }
+    } catch (e) {
+      console.error('Update order status failed', e);
+    }
   }, []);
 
   const addCategory = useCallback((category: Category) => {
@@ -271,6 +335,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const toggleWishlist = useCallback((product: Product) => {
     setWishlist(prev => {
       const exists = prev.find(p => p.id === product.id);
+      
+      setTimeout(() => {
+        if (exists) {
+          setCart(prevCart => prevCart.filter(item => item.product.id !== product.id));
+        } else {
+          const size = product.sizes?.[0] || 'M';
+          const color = product.colors?.[0] || 'Black';
+          setCart(prevCart => {
+            const existingCartItem = prevCart.find(item => item.product.id === product.id && item.size === size);
+            if (existingCartItem) {
+              return prevCart.map(item =>
+                item.product.id === product.id && item.size === size
+                  ? { ...item, quantity: item.quantity + 1 }
+                  : item
+              );
+            }
+            return [...prevCart, { product, quantity: 1, size, color }];
+          });
+        }
+      }, 0);
+
       if (exists) return prev.filter(p => p.id !== product.id);
       return [...prev, product];
     });
@@ -294,6 +379,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         products,
         categories,
         users,
+        orders,
+        addresses,
         user,
         isCartOpen,
         isSidebarOpen,
@@ -312,6 +399,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         addProduct,
         updateProduct,
         deleteProduct,
+        updateOrderStatus,
+        fetchProducts,
+        fetchOrders,
         addCategory,
         deleteCategory,
         addUser,

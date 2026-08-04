@@ -38,3 +38,22 @@ export interface Category {
   name: string;
   description: string;
 }
+
+export interface Address {
+  id: string;
+  name: string;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  isDefault?: boolean;
+}
+
+export interface Order {
+  id: string;
+  date: string;
+  status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  total: number;
+  items: CartItem[];
+  shippingAddress: Address;
+}

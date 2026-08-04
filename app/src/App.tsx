@@ -11,7 +11,6 @@ import Wishlist from '@/pages/Wishlist'
 import About from '@/pages/About'
 import Contact from '@/pages/Contact'
 import SizeGuide from '@/pages/SizeGuide'
-import LookbookPage from '@/pages/LookbookPage'
 import Account from '@/pages/Account'
 import AdminLayout from '@/pages/admin/AdminLayout'
 import AdminDashboard from '@/pages/admin/AdminDashboard'
@@ -21,6 +20,7 @@ import AdminLogin from '@/pages/admin/AdminLogin'
 import PlaceholderPage from '@/pages/admin/PlaceholderPage'
 import AdminUsers from '@/pages/admin/AdminUsers'
 import AdminCategory from '@/pages/admin/AdminCategory'
+import AdminOrders from '@/pages/admin/AdminOrders'
 
 export default function App() {
   return (
@@ -37,7 +37,6 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/size-guide" element={<SizeGuide />} />
-        <Route path="/lookbook" element={<LookbookPage />} />
         <Route path="/account" element={<Account />} />
         <Route path="/orders" element={<Account />} />
         <Route path="/profile" element={<Account />} />
@@ -55,7 +54,7 @@ export default function App() {
           <Route path="store-hero" element={<PlaceholderPage title="Store Hero" />} />
           <Route path="ads" element={<PlaceholderPage title="Manage Ads" />} />
           <Route path="team" element={<PlaceholderPage title="Manage Team" />} />
-          <Route path="orders" element={<PlaceholderPage title="Orders" />} />
+          <Route path="orders" element={<AdminOrders />} />
           <Route path="jobs" element={<PlaceholderPage title="Manage Jobs" />} />
           <Route path="applications" element={<PlaceholderPage title="Job Applications" />} />
           <Route path="contacts" element={<PlaceholderPage title="Contact Submissions" />} />
