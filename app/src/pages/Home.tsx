@@ -1,6 +1,5 @@
 import Navigation from '@/sections/Navigation';
 import Hero from '@/sections/Hero';
-import FeaturedCollection from '@/sections/FeaturedCollection';
 import ProductGrid from '@/sections/ProductGrid';
 import Manifesto from '@/sections/Manifesto';
 import Newsletter from '@/sections/Newsletter';
@@ -11,7 +10,6 @@ export default function Home() {
     <div className="bg-black min-h-screen">
       <Navigation />
       <Hero />
-      <FeaturedCollection />
       <ProductGrid />
       <Manifesto />
       <Newsletter />

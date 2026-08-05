@@ -14,16 +14,6 @@ const values = [
     title: 'Our Vision',
     description: 'To become the global symbol of premium fashion for the modern rebel — those who refuse to conform and choose to stand out in every room they enter.',
   },
-  {
-    icon: Award,
-    title: 'Our Craft',
-    description: 'Every piece is meticulously crafted using the finest materials sourced from around the world. From Italian leather to Japanese denim, we spare no expense in quality.',
-  },
-  {
-    icon: Users,
-    title: 'Our Community',
-    description: 'VARENAYAM is more than clothing — it is a movement. A community of creators, innovators, and dreamers who wear their ambition with pride.',
-  },
 ];
 
 export default function About() {
@@ -80,7 +70,7 @@ export default function About() {
           <span className="text-gold/70 text-xs tracking-[0.3em] uppercase font-medium">What Drives Us</span>
           <h2 className="font-display text-3xl md:text-4xl text-white mt-3">Our Core Values</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {values.map((value) => (
             <div key={value.title} className="gradient-border">
               <div className="gradient-inner p-6 md:p-8 text-center">

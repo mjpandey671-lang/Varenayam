@@ -30,13 +30,16 @@ interface StoreActions {
   addProduct: (product: Product) => void;
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
+  addOrder: (order: Order) => void;
   updateOrderStatus: (id: string, status: string) => Promise<void>;
+  deleteOrder: (id: string) => Promise<void>;
   fetchProducts: () => Promise<void>;
   fetchOrders: () => Promise<void>;
+  fetchUsers: () => Promise<void>;
   addCategory: (category: Category) => void;
   deleteCategory: (id: string) => void;
-  addUser: (user: User) => void;
-  deleteUser: (id: string) => void;
+  addUser: (user: User) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
   cartTotal: number;
   cartCount: number;
 }
@@ -163,12 +166,7 @@ const initialCategories: Category[] = [
   { id: '7', name: 'Shirts', description: 'Button-down signature shirts.' },
 ];
 
-const initialUsers: User[] = [
-  { id: '1', name: 'Rahul Sharma', email: 'rahul.s@example.com', role: 'Customer', joinDate: '2023-10-15' },
-  { id: '2', name: 'Priya Patel', email: 'priya.p@example.com', role: 'Customer', joinDate: '2023-11-02' },
-  { id: '3', name: 'Amit Kumar', email: 'amit.k@example.com', role: 'Admin', joinDate: '2023-01-10' },
-  { id: '4', name: 'Sneha Gupta', email: 'sneha.g@example.com', role: 'Customer', joinDate: '2024-02-28' },
-];
+const initialUsers: User[] = [];
 
 const initialAddresses: Address[] = [
   { id: '1', name: 'Home', street: '123 Main St', city: 'Mumbai', state: 'MH', zip: '400001', isDefault: true },
@@ -219,11 +217,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const fetchUsers = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/users`);
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch users', e);
+    }
+  }, []);
+
   // Fetch on mount
   useEffect(() => {
     fetchProducts();
     fetchOrders();
-  }, [fetchProducts, fetchOrders]);
+    fetchUsers();
+  }, [fetchProducts, fetchOrders, fetchUsers]);
 
   const addProduct = useCallback(async (product: Product) => {
     try {
@@ -268,6 +279,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const addOrder = useCallback((order: Order) => {
+    setOrders(prev => [...prev, order]);
+  }, []);
+
   const updateOrderStatus = useCallback(async (id: string, status: string) => {
     try {
       const res = await fetch(`${API_URL}/orders/${id}/status`, {
@@ -284,6 +299,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const deleteOrder = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`${API_URL}/orders/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setOrders(prev => prev.filter(o => o.id !== id));
+      }
+    } catch (e) {
+      console.error('Delete order failed', e);
+    }
+  }, []);
+
   const addCategory = useCallback((category: Category) => {
     setCategories(prev => [...prev, category]);
   }, []);
@@ -292,12 +318,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCategories(prev => prev.filter(c => c.id !== id));
   }, []);
 
-  const addUser = useCallback((user: User) => {
-    setUsers(prev => [...prev, user]);
+  const addUser = useCallback(async (user: User) => {
+    try {
+      const res = await fetch(`${API_URL}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user)
+      });
+      if (res.ok) {
+        const newUser = await res.json();
+        setUsers(prev => [...prev, newUser]);
+      }
+    } catch (e) {
+      console.error('Add user failed', e);
+    }
   }, []);
 
-  const deleteUser = useCallback((id: string) => {
-    setUsers(prev => prev.filter(u => u.id !== id));
+  const deleteUser = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setUsers(prev => prev.filter(u => u.id !== id));
+      }
+    } catch (e) {
+      console.error('Delete user failed', e);
+    }
   }, []);
 
   const addToCart = useCallback((product: Product, size: string, color: string, quantity = 1) => {
@@ -399,9 +444,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         addProduct,
         updateProduct,
         deleteProduct,
+        addOrder,
         updateOrderStatus,
+        deleteOrder,
         fetchProducts,
         fetchOrders,
+        fetchUsers,
         addCategory,
         deleteCategory,
         addUser,

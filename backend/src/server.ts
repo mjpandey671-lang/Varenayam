@@ -17,9 +17,12 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+import userRoutes from './routes/userRoutes';
+
 // Routes
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
 
 // Basic health-check route
 app.get('/api/health', (req, res) => {

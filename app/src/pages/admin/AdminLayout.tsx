@@ -43,8 +43,6 @@ export default function AdminLayout() {
     { name: 'Manage Ads', path: '/admin/ads', icon: Megaphone },
     { name: 'Manage Team', path: '/admin/team', icon: Users },
     { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
-    { name: 'Manage Jobs', path: '/admin/jobs', icon: Briefcase },
-    { name: 'Job Applications', path: '/admin/applications', icon: FileText },
     { name: 'Contact Submissions', path: '/admin/contacts', icon: MessageSquare },
     { name: 'Users', path: '/admin/users', icon: User },
   ];

@@ -57,5 +57,19 @@ router.put('/:id/status', async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 });
-
+// DELETE an order (for admin)
+router.delete('/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    
+    if (order) {
+      await Order.findByIdAndDelete(req.params.id);
+      res.json({ message: 'Order removed' });
+    } else {
+      res.status(404).json({ message: 'Order not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
 export default router;

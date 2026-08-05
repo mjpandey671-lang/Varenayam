@@ -1,54 +1,140 @@
 import { useRef, useEffect } from 'react';
 import { Link } from 'react-router';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
+
+const frameCount = 162;
+const currentFrame = (index: number) => (
+  `/frames24/frame_${(index + 1).toString().padStart(5, '0')}.jpg`
+);
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const headlineRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const bgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    const tl = gsap.timeline({ delay: 0.2 });
-    
-    if (bgRef.current) {
-      gsap.fromTo(bgRef.current, 
-        { scale: 1 }, 
-        { scale: 1.08, duration: 25, ease: 'power1.out' }
-      );
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext('2d');
+    if (!canvas || !context) return;
+
+    // Set canvas dimensions
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Load images
+    const images: HTMLImageElement[] = [];
+    const seq = { frame: 0 };
+
+    for (let i = 0; i < frameCount; i++) {
+      const img = new Image();
+      img.src = currentFrame(i);
+      images.push(img);
     }
 
+    const render = () => {
+      if (images[seq.frame] && images[seq.frame].complete) {
+        // Clear and draw image with cover aspect ratio
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        const img = images[seq.frame];
+        
+        // Calculate object-cover dimensions
+        const hRatio = canvas.width / img.width;
+        const vRatio = canvas.height / img.height;
+        const ratio = Math.max(hRatio, vRatio);
+        const centerShift_x = (canvas.width - img.width * ratio) / 2;
+        const centerShift_y = (canvas.height - img.height * ratio) / 2;  
+
+        context.drawImage(img, 0, 0, img.width, img.height,
+          centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
+      }
+    };
+
+    // Initial render when first image loads
+    images[0].onload = render;
+
+    // Initial Setup: Show 'NEW DROPS' on load, hide everything else
+    if (headlineRef.current) {
+      gsap.fromTo(headlineRef.current.children[1], 
+        { opacity: 0, y: 30 }, 
+        { opacity: 1, y: 0, duration: 1, ease: 'power3.out', delay: 0.2 }
+      );
+      gsap.set(headlineRef.current.children[0], { opacity: 0, y: 30 });
+      gsap.set(headlineRef.current.children[2], { opacity: 0, y: 30 });
+    }
+    if (ctaRef.current) {
+      gsap.set(ctaRef.current, { opacity: 0, y: 20 });
+    }
+
+    // Scroll animation for frames and text
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top top",
+        end: "+=300%", // 300% of viewport height for scrolling
+        scrub: 0.5,
+        pin: true,
+      }
+    });
+
+    // Fade out 'NEW DROPS' immediately when scrolling starts
+    if (headlineRef.current) {
+      tl.to(headlineRef.current.children[1], {
+        opacity: 0,
+        y: -30,
+        duration: 0.1
+      }, 0);
+    }
+
+    // Animate Frames
+    tl.to(seq, {
+      frame: frameCount - 1,
+      snap: "frame",
+      ease: "none",
+      onUpdate: render,
+      duration: 1
+    }, 0);
+
+    // Fade in text animations towards the end of the scroll
     if (headlineRef.current) {
       tl.fromTo(headlineRef.current.children, 
         { opacity: 0, y: 30 }, 
-        { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: 'power3.out' }
+        { opacity: 1, y: 0, duration: 0.3, stagger: 0.1, ease: 'power3.out' },
+        0.6 // Start fading in text at 60% of the scroll timeline
       );
     }
     
     if (ctaRef.current) {
       tl.fromTo(ctaRef.current, 
         { opacity: 0, y: 20 }, 
-        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, 
-        '-=0.4'
+        { opacity: 1, y: 0, duration: 0.2, ease: 'power3.out' }, 
+        0.8 // CTA fades in at 80% of the timeline
       );
     }
-    
-    return () => { 
-      tl.kill(); 
-      gsap.killTweensOf(bgRef.current);
+
+    // Handle Resize
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      render();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      tl.scrollTrigger?.kill();
+      tl.kill();
     };
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-      {/* Background Image */}
+    <section ref={sectionRef} className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-black">
+      {/* Canvas Background */}
       <div className="absolute inset-0 z-0 bg-black">
-        <img 
-          ref={bgRef}
-          src="/images/hero-bg.jpg" 
-          alt="Luxury Streetwear" 
-          className="w-full h-full object-cover object-center opacity-80"
-        />
+        <canvas ref={canvasRef} className="w-full h-full" />
         {/* Dark Gradient Overlays for readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0f1219]/90 via-transparent to-[#0f1219]/90" />
         <div className="absolute inset-0 bg-black/40" />

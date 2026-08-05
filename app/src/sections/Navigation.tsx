@@ -24,32 +24,12 @@ export default function Navigation() {
     setSearchOpen(false);
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (isSidebarOpen && sidebarRef.current) {
-      gsap.fromTo(sidebarRef.current, { x: '-100%' }, { x: '0%', duration: 0.4, ease: 'power3.inOut' });
-    }
-  }, [isSidebarOpen]);
-
-  useEffect(() => {
-    if (isCartOpen && cartRef.current) {
-      gsap.fromTo(cartRef.current, { x: '100%' }, { x: '0%', duration: 0.4, ease: 'power3.inOut' });
-    }
-  }, [isCartOpen]);
-
   const closeSidebar = () => {
-    if (sidebarRef.current) {
-      gsap.to(sidebarRef.current, { x: '-100%', duration: 0.4, ease: 'power3.inOut', onComplete: () => setIsSidebarOpen(false) });
-    } else {
-      setIsSidebarOpen(false);
-    }
+    setIsSidebarOpen(false);
   };
 
   const closeCart = () => {
-    if (cartRef.current) {
-      gsap.to(cartRef.current, { x: '100%', duration: 0.4, ease: 'power3.inOut', onComplete: () => setIsCartOpen(false) });
-    } else {
-      setIsCartOpen(false);
-    }
+    setIsCartOpen(false);
   };
 
   const navLinks = [
@@ -193,13 +173,12 @@ export default function Navigation() {
       </div>
 
       {/* Sidebar Menu */}
-      {isSidebarOpen && (
-        <div className="fixed inset-0 z-[60]">
-          <div className="absolute inset-0 bg-black/50" onClick={closeSidebar} />
-          <div
-            ref={sidebarRef}
-            className="absolute left-0 top-0 bottom-0 w-[400px] max-w-[85vw] bg-black border-l-2 border-gold flex flex-col"
-          >
+      <div className={`fixed inset-0 z-[60] transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div className="absolute inset-0 bg-black/50" onClick={closeSidebar} />
+        <div
+          ref={sidebarRef}
+          className={`absolute left-0 top-0 bottom-0 w-[400px] max-w-[85vw] bg-black border-r-2 border-gold flex flex-col transition-transform duration-300 ease-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        >
             {/* Sidebar Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <img src="/images/varenayam-logo-cropped.jpg" alt="VARENAYAM" className="h-10 w-auto object-contain mix-blend-screen" />
@@ -256,17 +235,15 @@ export default function Navigation() {
             </div>
           </div>
         </div>
-      )}
 
       {/* Cart Drawer */}
-      {isCartOpen && (
-        <div className="fixed inset-0 z-[60]">
-          <div className="absolute inset-0 bg-black/50" onClick={closeCart} />
-          <div
-            ref={cartRef}
-            className="absolute right-0 top-0 bottom-0 w-[480px] max-w-[90vw] bg-black border-t-2 border-gold flex flex-col"
-          >
-            {/* Cart Header */}
+      <div className={`fixed inset-0 z-[60] transition-opacity duration-300 ${isCartOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div className="absolute inset-0 bg-black/50" onClick={closeCart} />
+        <div
+          ref={cartRef}
+          className={`absolute right-0 top-0 bottom-0 w-[480px] max-w-[90vw] bg-black border-l-2 border-gold flex flex-col transition-transform duration-300 ease-out ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        >
+          {/* Cart Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <h3 className="font-display text-xl text-gold tracking-wider">Shopping Cart ({cartCount})</h3>
               <button onClick={closeCart} className="text-white hover:text-gold transition-colors p-2">
@@ -343,7 +320,6 @@ export default function Navigation() {
             )}
           </div>
         </div>
-      )}
     </>
   );
 }
