@@ -1,11 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import connectDB from './config/db';
 import productRoutes from './routes/productRoutes';
 import orderRoutes from './routes/orderRoutes';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // Connect to Database
 connectDB();
