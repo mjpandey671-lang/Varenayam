@@ -41,7 +41,7 @@ export default function Login() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="text-center mb-10">
-            <img src="/images/varenayam-logo.jpg" alt="VARENAYAM" className="h-16 w-auto object-contain mx-auto mb-6" />
+            <img src="/images/varenayam-logo.png" alt="VARENAYAM" className="h-16 w-auto object-contain mx-auto mb-6" />
             <h1 className="font-display text-2xl md:text-3xl text-white">Welcome Back</h1>
             <p className="text-white/40 text-sm mt-2">Sign in to your VARENAYAM account</p>
           </div>

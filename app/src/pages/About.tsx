@@ -27,7 +27,7 @@ export default function About() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gold/5 rounded-full blur-[150px]" />
         </div>
         <div className="relative max-w-4xl mx-auto">
-          <img src="/images/varenayam-logo.jpg" alt="VARENAYAM" className="h-20 w-auto object-contain mx-auto mb-8" />
+          <img src="/images/varenayam-logo.png" alt="VARENAYAM" className="h-20 w-auto object-contain mx-auto mb-8" />
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-gold mb-6">VARENAYAM</h1>
           <p className="font-subheading italic text-xl md:text-2xl text-white/60 leading-relaxed">
             Born to stand out. Crafted for the bold.

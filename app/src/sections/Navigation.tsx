@@ -63,9 +63,9 @@ export default function Navigation() {
             </button>
             <Link to="/" className="hidden lg:flex items-center gap-3 flex-shrink-0">
               <img
-                src="/images/varenayam-logo-cropped.jpg"
+                src="/images/varenayam-logo-cropped.png"
                 alt="VARENAYAM"
-                className="h-9 w-auto object-contain mix-blend-screen"
+                className="h-9 w-auto object-contain"
               />
               <span className="font-bold text-gold text-lg tracking-wide">VARENAYAM</span>
             </Link>
@@ -76,9 +76,9 @@ export default function Navigation() {
             {/* Mobile Logo */}
             <Link to="/" className="lg:hidden flex-shrink-0 flex items-center gap-2">
               <img
-                src="/images/varenayam-logo-cropped.jpg"
+                src="/images/varenayam-logo-cropped.png"
                 alt="VARENAYAM"
-                className="h-8 w-auto object-contain mix-blend-screen"
+                className="h-8 w-auto object-contain"
               />
               <span className="font-bold text-gold text-base tracking-wide">VARENAYAM</span>
             </Link>
@@ -181,7 +181,7 @@ export default function Navigation() {
         >
             {/* Sidebar Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/10">
-              <img src="/images/varenayam-logo-cropped.jpg" alt="VARENAYAM" className="h-10 w-auto object-contain mix-blend-screen" />
+              <img src="/images/varenayam-logo-cropped.png" alt="VARENAYAM" className="h-10 w-auto object-contain" />
               <button onClick={closeSidebar} className="text-white hover:text-gold transition-colors p-2">
                 <X size={22} />
               </button>

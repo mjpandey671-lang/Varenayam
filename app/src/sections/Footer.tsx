@@ -48,9 +48,9 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-4 lg:col-span-1 mb-4 lg:mb-0">
             <Link to="/" className="inline-block mb-6">
               <img
-                src="/images/varenayam-logo-cropped.jpg"
+                src="/images/varenayam-logo-cropped.png"
                 alt="VARENAYAM"
-                className="h-20 w-auto object-contain mix-blend-screen"
+                className="h-20 w-auto object-contain"
               />
             </Link>
             <p className="text-white/40 text-sm leading-relaxed mb-6 max-w-xs">

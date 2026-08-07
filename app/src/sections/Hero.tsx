@@ -5,9 +5,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const frameCount = 162;
+const frameCount = 250;
 const currentFrame = (index: number) => (
-  `/frames24/frame_${(index + 1).toString().padStart(5, '0')}.jpg`
+  `/frames24_jpeg100/frame_${(index + 1).toString().padStart(6, '0')}.jpg`
 );
 
 export default function Hero() {
