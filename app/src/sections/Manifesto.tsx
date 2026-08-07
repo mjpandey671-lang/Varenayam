@@ -68,7 +68,7 @@ export default function Manifesto() {
     return () => ctx.revert();
   }, []);
 
-  const manifestoText = "We are the misfits, the rebels, the ones who see the world differently.";
+  const manifestoText = "Born to Stand out";
 
   return (
     <section

@@ -13,10 +13,11 @@ interface StoreState {
   isCartOpen: boolean;
   isSidebarOpen: boolean;
   searchQuery: string;
+  isLoginPopupOpen: boolean;
 }
 
 interface StoreActions {
-  addToCart: (product: Product, size: string, color: string, quantity?: number) => void;
+  addToCart: (product: Product, size: string, color: string, quantity?: number) => boolean;
   removeFromCart: (productId: string, size: string) => void;
   updateCartQuantity: (productId: string, size: string, quantity: number) => void;
   clearCart: () => void;
@@ -25,6 +26,7 @@ interface StoreActions {
   setIsCartOpen: (open: boolean) => void;
   setIsSidebarOpen: (open: boolean) => void;
   setSearchQuery: (query: string) => void;
+  setIsLoginPopupOpen: (open: boolean) => void;
   login: (user: User) => void;
   logout: () => void;
   addProduct: (product: Product) => void;
@@ -192,6 +194,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -345,7 +348,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const addToCart = useCallback((product: Product, size: string, color: string, quantity = 1) => {
+  const addToCart = useCallback((product: Product, size: string, color: string, quantity = 1): boolean => {
+    if (!user) {
+      setIsLoginPopupOpen(true);
+      return false;
+    }
     setCart(prev => {
       const existing = prev.find(item => item.product.id === product.id && item.size === size);
       if (existing) {
@@ -357,7 +364,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, { product, quantity, size, color }];
     });
-  }, []);
+    return true;
+  }, [user]);
 
   const removeFromCart = useCallback((productId: string, size: string) => {
     setCart(prev => prev.filter(item => !(item.product.id === productId && item.size === size)));
@@ -378,6 +386,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const clearCart = useCallback(() => setCart([]), []);
 
   const toggleWishlist = useCallback((product: Product) => {
+    if (!user) {
+      setIsLoginPopupOpen(true);
+      return;
+    }
     setWishlist(prev => {
       const exists = prev.find(p => p.id === product.id);
       
@@ -404,7 +416,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (exists) return prev.filter(p => p.id !== product.id);
       return [...prev, product];
     });
-  }, []);
+  }, [user]);
 
   const isInWishlist = useCallback((productId: string) => {
     return wishlist.some(p => p.id === productId);
@@ -430,6 +442,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         isCartOpen,
         isSidebarOpen,
         searchQuery,
+        isLoginPopupOpen,
         addToCart,
         removeFromCart,
         updateCartQuantity,
@@ -439,6 +452,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setIsCartOpen,
         setIsSidebarOpen,
         setSearchQuery,
+        setIsLoginPopupOpen,
         login,
         logout,
         addProduct,

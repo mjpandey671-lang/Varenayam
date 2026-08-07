@@ -12,7 +12,8 @@ const productSchema = new mongoose.Schema({
   colors: [{ type: String }],
   inStock: { type: Boolean, default: true },
   isNewProduct: { type: Boolean, default: false },
-  isBestseller: { type: Boolean, default: false }
+  isBestseller: { type: Boolean, default: false },
+  isFeatured: { type: Boolean, default: false }
 }, {
   timestamps: true
 });

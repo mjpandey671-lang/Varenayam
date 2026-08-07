@@ -15,9 +15,12 @@ export default function ProductGrid() {
   const [activeCategory, setActiveCategory] = useState('All');
   const { toggleWishlist, isInWishlist, setIsCartOpen, addToCart, products } = useStore();
 
+  const featuredProducts = products.filter(p => p.isFeatured);
+  const displayProducts = featuredProducts.length > 0 ? featuredProducts : products;
+  
   let filteredProducts = activeCategory === 'All' 
-    ? products 
-    : products.filter(p => p.category === activeCategory);
+    ? displayProducts 
+    : displayProducts.filter(p => p.category === activeCategory);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -36,12 +39,13 @@ export default function ProductGrid() {
   }, [filteredProducts]);
 
   const handleQuickAdd = (product: any) => {
-    addToCart(product, product.sizes[0], product.colors[0], 1);
-    setIsCartOpen(true);
+    if (addToCart(product, product.sizes[0], product.colors[0], 1)) {
+      setIsCartOpen(true);
+    }
   };
 
   return (
-    <section ref={sectionRef} className="py-20 md:py-32 bg-black px-[4vw]">
+    <section ref={sectionRef} className="pt-8 md:pt-12 pb-20 md:pb-32 bg-black px-[4vw]">
       {/* Section Header */}
       <div className="text-center mb-12">
         <span className="text-gold/70 text-xs tracking-[0.3em] uppercase font-medium">Curated Selection</span>

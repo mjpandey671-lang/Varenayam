@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router'
 import { StoreProvider } from '@/hooks/useStore'
 import ScrollToTop from '@/components/ScrollToTop'
+import LoginPopup from '@/components/LoginPopup'
 import Home from '@/pages/Home'
 import Shop from '@/pages/Shop'
 import ProductDetail from '@/pages/ProductDetail'
@@ -21,11 +22,13 @@ import PlaceholderPage from '@/pages/admin/PlaceholderPage'
 import AdminUsers from '@/pages/admin/AdminUsers'
 import AdminCategory from '@/pages/admin/AdminCategory'
 import AdminOrders from '@/pages/admin/AdminOrders'
+import AdminFeaturedProducts from '@/pages/admin/AdminFeaturedProducts'
 
 export default function App() {
   return (
     <StoreProvider>
       <ScrollToTop />
+      <LoginPopup />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
@@ -51,7 +54,7 @@ export default function App() {
           <Route path="products/add" element={<AdminProductForm />} />
           <Route path="products/edit/:id" element={<AdminProductForm />} />
           <Route path="hero" element={<PlaceholderPage title="Manage Hero" />} />
-          <Route path="store-hero" element={<PlaceholderPage title="Store Hero" />} />
+          <Route path="featured-products" element={<AdminFeaturedProducts />} />
           <Route path="ads" element={<PlaceholderPage title="Manage Ads" />} />
           <Route path="team" element={<PlaceholderPage title="Manage Team" />} />
           <Route path="orders" element={<AdminOrders />} />

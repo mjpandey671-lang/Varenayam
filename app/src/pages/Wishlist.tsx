@@ -8,9 +8,10 @@ export default function Wishlist() {
   const { wishlist, toggleWishlist, addToCart, setIsCartOpen } = useStore();
 
   const handleMoveToCart = (product: typeof wishlist[0]) => {
-    addToCart(product, product.sizes[0], product.colors[0], 1);
-    toggleWishlist(product);
-    setIsCartOpen(true);
+    if (addToCart(product, product.sizes[0], product.colors[0], 1)) {
+      setIsCartOpen(true);
+      toggleWishlist(product);
+    }
   };
 
   return (

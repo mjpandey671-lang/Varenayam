@@ -6,7 +6,7 @@ import { Mail, Phone, MapPin, Clock, Send, Check } from 'lucide-react';
 const contactInfo = [
   { icon: Mail, label: 'Email', value: 'support@varenayam.com' },
   { icon: Phone, label: 'Phone', value: '+91 98765 43210' },
-  { icon: MapPin, label: 'Address', value: '123 Fashion Street, Bandra West, Mumbai - 400050' },
+  { icon: MapPin, label: 'Address', value: 'makarba Ahemdabad pin -380051' },
   { icon: Clock, label: 'Hours', value: 'Mon - Sat: 10:00 AM - 7:00 PM IST' },
 ];
 

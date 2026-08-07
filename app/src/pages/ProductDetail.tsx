@@ -45,15 +45,18 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!selectedSize || !selectedColor) return;
-    addToCart(product, selectedSize, selectedColor, quantity);
+    if (addToCart(product, selectedSize, selectedColor, quantity)) {
+      setIsCartOpen(true);
+    }
     setShowAddedMessage(true);
     setTimeout(() => setShowAddedMessage(false), 2000);
   };
 
   const handleBuyNow = () => {
     if (!selectedSize || !selectedColor) return;
-    addToCart(product, selectedSize, selectedColor, quantity);
-    navigate('/checkout');
+    if (addToCart(product, selectedSize, selectedColor, quantity)) {
+      navigate('/checkout');
+    }
   };
 
   const relatedProducts = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);

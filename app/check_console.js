@@ -11,7 +11,7 @@ import puppeteer from 'puppeteer';
       console.log('REQUEST FAILED:', request.url(), request.failure()?.errorText)
     );
 
-    await page.goto('http://localhost:3001', { waitUntil: 'networkidle0' });
+    await page.goto('http://localhost:3000', { waitUntil: 'networkidle0' });
     await browser.close();
   } catch (err) {
     console.error("Puppeteer Error:", err);

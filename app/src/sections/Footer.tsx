@@ -154,7 +154,7 @@ export default function Footer() {
           </div>
           <div>
             <span className="text-white/30 text-xs uppercase tracking-wider">Address</span>
-            <p className="text-white/60 text-sm mt-1">Mumbai, Maharashtra, India</p>
+            <p className="text-white/60 text-sm mt-1">makarba Ahemdabad pin -380051</p>
           </div>
         </div>
 

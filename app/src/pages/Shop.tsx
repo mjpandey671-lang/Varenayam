@@ -87,8 +87,9 @@ export default function Shop() {
   };
 
   const handleQuickAdd = (product: any) => {
-    addToCart(product, product.sizes[0], product.colors[0], 1);
-    setIsCartOpen(true);
+    if (addToCart(product, product.sizes[0], product.colors[0], 1)) {
+      setIsCartOpen(true);
+    }
   };
 
   const clearAllFilters = () => {

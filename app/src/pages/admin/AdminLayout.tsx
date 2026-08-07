@@ -39,7 +39,7 @@ export default function AdminLayout() {
     { name: 'Create Category', path: '/admin/category', icon: FolderPlus },
     { name: 'Create Product', path: '/admin/products', icon: PackagePlus },
     { name: 'Manage Hero', path: '/admin/hero', icon: ImageIcon },
-    { name: 'Store Hero', path: '/admin/store-hero', icon: ImagePlus },
+    { name: 'Featured Products', path: '/admin/featured-products', icon: ImagePlus },
     { name: 'Manage Ads', path: '/admin/ads', icon: Megaphone },
     { name: 'Manage Team', path: '/admin/team', icon: Users },
     { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },

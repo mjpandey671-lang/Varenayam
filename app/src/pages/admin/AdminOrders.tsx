@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '@/hooks/useStore';
 import { Package, CheckCircle, Clock, XCircle, Truck, Eye, X } from 'lucide-react';
-import { Order } from '@/types';
+import type { Order } from '@/types';
 
 export default function AdminOrders() {
   const { orders, updateOrderStatus } = useStore();
