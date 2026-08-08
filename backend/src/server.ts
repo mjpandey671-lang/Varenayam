@@ -30,6 +30,11 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'success', message: 'Backend is running correctly.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+// Export for Vercel Serverless Function
+export default app;
