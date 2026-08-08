@@ -35,6 +35,7 @@ export default function Shop() {
   
   const [sortBy, setSortBy] = useState('recommended');
   const [showSort, setShowSort] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const { toggleWishlist, isInWishlist, setIsCartOpen, addToCart, products } = useStore();
 
@@ -119,8 +120,14 @@ export default function Shop() {
         
         {/* Left Sidebar (Filters) */}
         <div className="w-full md:w-[250px] flex-shrink-0 md:sticky md:top-[120px]">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-bold text-white tracking-widest uppercase">Filters</h3>
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <button 
+              className="font-bold text-white tracking-widest uppercase flex items-center gap-2 md:pointer-events-none"
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+            >
+              Filters
+              <ChevronDown size={16} className={`md:hidden transition-transform ${showMobileFilters ? 'rotate-180' : ''}`} />
+            </button>
             {(selectedCategories.length > 0 || selectedColors.length > 0 || selectedSizes.length > 0 || selectedPriceRanges.length > 0) && (
               <button onClick={clearAllFilters} className="text-gold text-xs font-bold uppercase tracking-wider hover:text-white transition-colors">
                 Clear All
@@ -128,7 +135,7 @@ export default function Shop() {
             )}
           </div>
 
-          <div className="space-y-8">
+          <div className={`${showMobileFilters ? 'block mb-8' : 'hidden'} md:block space-y-8`}>
             {/* Categories */}
             <div className="border-t border-white/10 pt-6">
               <h4 className="font-bold text-white/80 uppercase text-xs tracking-wider mb-4">Categories</h4>

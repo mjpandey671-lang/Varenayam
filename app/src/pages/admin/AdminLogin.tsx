@@ -11,8 +11,11 @@ export default function AdminLogin() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Hardcoded credentials for prototype
-    if (email === 'admin@varenayam.com' && password === 'admin123') {
+    const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'mjpandey671@gmail.com';
+    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'Pandey@555';
+    
+    // Check against configured credentials
+    if (email === adminEmail && password === adminPassword) {
       localStorage.setItem('varenayam_admin_auth', 'true');
       navigate('/admin');
     } else {
