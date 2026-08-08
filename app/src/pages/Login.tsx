@@ -21,7 +21,10 @@ export default function Login() {
       setIsLoading(false);
       
       // If admin logs in from the main website, redirect them to the admin panel
-      if (email === 'admin@varenayam.com' && password === 'admin123') {
+      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'mjpandey671@gmail.com';
+      const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'Pandey@555';
+      
+      if (email === adminEmail && password === adminPassword) {
         localStorage.setItem('varenayam_admin_auth', 'true');
         login({ id: '0', name: 'Admin', email }); // Set user context too
         navigate('/admin');

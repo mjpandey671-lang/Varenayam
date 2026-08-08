@@ -49,14 +49,14 @@ export default function Navigation() {
 
       {/* Navigation */}
       <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 w-full pointer-events-none">
-        <nav className={`w-full max-w-6xl h-16 lg:h-[72px] rounded-2xl transition-all duration-500 flex items-center justify-between px-6 lg:px-8 border pointer-events-auto shadow-2xl ${
+        <nav className={`w-full max-w-6xl h-16 lg:h-[72px] rounded-2xl transition-all duration-500 flex items-center justify-between px-3 sm:px-6 lg:px-8 border pointer-events-auto shadow-2xl ${
           scrolled ? 'bg-[#0f1219]/95 backdrop-blur-xl border-white/10' : 'bg-[#0f1219]/80 backdrop-blur-md border-white/5'
         }`}>
           {/* Left - Hamburger (Mobile) & Logo (Desktop) */}
-          <div className="flex-1 flex items-center gap-4">
+          <div className="flex-1 flex items-center">
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden text-white hover:text-gold transition-colors duration-300 p-2"
+              className="lg:hidden text-white hover:text-gold transition-colors duration-300 p-1.5 sm:p-2 -ml-1"
               aria-label="Open menu"
             >
               <Menu size={22} strokeWidth={1.5} />
@@ -72,15 +72,15 @@ export default function Navigation() {
           </div>
 
           {/* Center - Desktop Nav Links & Logo (Mobile) */}
-          <div className="flex-[2] flex justify-center">
+          <div className="flex-[2] flex justify-center px-1">
             {/* Mobile Logo */}
-            <Link to="/" className="lg:hidden flex-shrink-0 flex items-center gap-2">
+            <Link to="/" className="lg:hidden flex-shrink-0 flex items-center gap-1.5">
               <img
                 src="/images/varenayam-logo-cropped.png"
                 alt="VARENAYAM"
-                className="h-8 w-auto object-contain"
+                className="h-6 sm:h-8 w-auto object-contain"
               />
-              <span className="font-bold text-gold text-base tracking-wide">VARENAYAM</span>
+              <span className="font-bold text-gold text-[13px] sm:text-base tracking-wide truncate">VARENAYAM</span>
             </Link>
             
             {/* Desktop Links */}
@@ -105,10 +105,10 @@ export default function Navigation() {
           </div>
 
           {/* Right - Icons & Solid Action Button */}
-          <div className="flex items-center justify-end gap-3 lg:gap-4 flex-1">
+          <div className="flex items-center justify-end gap-1 sm:gap-3 lg:gap-4 flex-1">
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="text-white/80 hover:text-white transition-colors duration-300 p-2"
+              className="text-white/80 hover:text-white transition-colors duration-300 p-1.5 sm:p-2"
               aria-label="Search"
             >
               <Search size={20} strokeWidth={1.5} />
@@ -116,7 +116,7 @@ export default function Navigation() {
             
             <button
               onClick={() => setIsCartOpen(true)}
-              className="text-white/80 hover:text-white transition-colors duration-300 p-2 relative"
+              className="text-white/80 hover:text-white transition-colors duration-300 p-1.5 sm:p-2 relative"
               aria-label="Cart"
             >
               <ShoppingBag size={20} strokeWidth={1.5} />
@@ -148,7 +148,7 @@ export default function Navigation() {
             {/* Mobile User Icon */}
             <Link
               to={user ? "/account" : "/login"}
-              className="lg:hidden text-white/80 hover:text-white transition-colors duration-300 p-2"
+              className="lg:hidden text-white/80 hover:text-white transition-colors duration-300 p-1.5 sm:p-2 -mr-1"
               aria-label="Account"
             >
               <User size={20} strokeWidth={1.5} />
