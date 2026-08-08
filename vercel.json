@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "outputDirectory": "app/dist",
+  "outputDirectory": "app/build",
   "builds": [
     {
       "src": "backend/src/server.ts",
@@ -10,7 +10,7 @@
       "src": "app/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "distDir": "build"
       }
     }
   ],
@@ -21,7 +21,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "app/$1"
+      "dest": "app/build/$1"
     }
   ]
 }

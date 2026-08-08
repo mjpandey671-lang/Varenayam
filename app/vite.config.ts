@@ -20,4 +20,7 @@ export default defineConfig({
     },
   },
   envDir: '../',
+  build: {
+    outDir: 'build'
+  }
 });
