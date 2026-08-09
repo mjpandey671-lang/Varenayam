@@ -1,0 +1,12 @@
+{
+  "name": "varenayam-root",
+  "private": true,
+  "workspaces": [
+    "app",
+    "backend"
+  ],
+  "scripts": {
+    "install": "npm install --ws",
+    "build": "npm run build --workspace=app"
+  }
+}
