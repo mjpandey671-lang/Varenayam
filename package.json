@@ -6,7 +6,6 @@
     "backend"
   ],
   "scripts": {
-    "install": "npm install --ws",
     "build": "npm run build --workspace=app"
   }
 }
