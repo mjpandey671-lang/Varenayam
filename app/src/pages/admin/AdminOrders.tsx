@@ -127,7 +127,8 @@ export default function AdminOrders() {
                   <tr key={order.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="p-4 text-white font-medium">#{order.id.slice(-6).toUpperCase()}</td>
                     <td className="p-4 text-white/60 text-sm">
-                      {new Date(order.date).toLocaleDateString()}
+                      <div className="whitespace-nowrap">{new Date(order.date).toLocaleDateString('en-IN')}</div>
+                      <div className="text-xs text-white/40">{new Date(order.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
                     </td>
                     <td className="p-4 text-sm max-w-[200px] truncate">
                       {order.user && typeof order.user === 'object' ? (

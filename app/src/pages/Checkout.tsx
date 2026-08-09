@@ -60,7 +60,7 @@ export default function Checkout() {
       const newOrder = {
         id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
         user: user?.id,
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString(),
         status: 'Processing' as const,
         paymentMethod: paymentMethod as 'UPI' | 'COD',
         total,

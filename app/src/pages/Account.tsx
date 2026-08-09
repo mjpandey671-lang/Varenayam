@@ -35,8 +35,8 @@ function OrdersView() {
           {myOrders.map(order => (
             <div key={order.id} className="bg-dark-surface p-6 rounded-lg border border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <p className="text-white font-medium">Order #{order.id}</p>
-                <p className="text-white/40 text-sm">{new Date(order.date).toLocaleDateString()}</p>
+                <p className="text-white font-medium">Order #{order.id.slice(-6).toUpperCase()}</p>
+                <p className="text-white/40 text-sm">{new Date(order.date).toLocaleDateString('en-IN')} {new Date(order.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</p>
               </div>
               <div className="flex items-center gap-6">
                 <span className={`text-sm px-3 py-1 rounded-full border ${order.status === 'Delivered' ? 'border-green-500 text-green-500' : 'border-gold text-gold'}`}>
