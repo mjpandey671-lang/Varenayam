@@ -14,6 +14,7 @@ interface StoreState {
   isSidebarOpen: boolean;
   searchQuery: string;
   isLoginPopupOpen: boolean;
+  token: string | null;
 }
 
 interface StoreActions {
@@ -27,11 +28,11 @@ interface StoreActions {
   setIsSidebarOpen: (open: boolean) => void;
   setSearchQuery: (query: string) => void;
   setIsLoginPopupOpen: (open: boolean) => void;
-  login: (user: User) => void;
+  login: (user: User, token: string) => void;
   logout: () => void;
-  addProduct: (product: Product) => void;
-  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
-  deleteProduct: (id: string) => Promise<void>;
+  addProduct: (product: Product) => Promise<boolean>;
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<boolean>;
+  deleteProduct: (id: string) => Promise<boolean>;
   addOrder: (order: Order) => void;
   updateOrderStatus: (id: string, status: string) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
@@ -42,6 +43,7 @@ interface StoreActions {
   deleteCategory: (id: string) => void;
   addUser: (user: User) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
+  addAddress: (address: Address) => void;
   cartTotal: number;
   cartCount: number;
 }
@@ -49,114 +51,6 @@ interface StoreActions {
 const API_URL = import.meta.env.DEV ? 'http://localhost:5000/api' : '/api';
 
 const StoreContext = createContext<(StoreState & StoreActions) | null>(null);
-
-const initialProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Shadow Hoodie',
-    description: 'Premium oversized hoodie in heavyweight cotton fleece. Features gold-tone drawstring tips and embroidered logo detail on the chest.',
-    price: 4999,
-    originalPrice: 5999,
-    image: '/images/custom-hoodie.jpg',
-    images: ['/images/custom-hoodie.jpg', '/images/collection-1.jpg'],
-    category: 'Hoodies',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'Charcoal'],
-    inStock: true,
-    isNew: true,
-    isBestseller: true,
-  },
-  {
-    id: '2',
-    name: 'Gold Line Bomber',
-    description: 'Signature bomber jacket with gold zipper accents and quilted lining. Water-resistant outer shell with premium hardware.',
-    price: 8999,
-    originalPrice: 10999,
-    image: '/images/custom-jacket.jpg',
-    images: ['/images/custom-jacket.jpg', '/images/collection-2.jpg'],
-    category: 'Jackets',
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Black', 'Navy'],
-    inStock: true,
-    isNew: true,
-  },
-  {
-    id: '3',
-    name: 'Tactical Cargo',
-    description: 'Multi-pocket cargo pants with adjustable waist and gold-tone hardware. Relaxed fit with tapered ankle.',
-    price: 4499,
-    image: '/images/product-3.jpg',
-    images: ['/images/product-3.jpg', '/images/collection-3.jpg'],
-    category: 'Pants',
-    sizes: ['28', '30', '32', '34', '36'],
-    colors: ['Black', 'Olive'],
-    inStock: true,
-    isBestseller: true,
-  },
-  {
-    id: '4',
-    name: 'Heritage Tee',
-    description: 'Premium cotton t-shirt with metallic gold graphic print. Relaxed fit with reinforced neckline.',
-    price: 2499,
-    image: '/images/custom-tshirt.jpg',
-    images: ['/images/custom-tshirt.jpg', '/images/lookbook-1.jpg'],
-    category: 'T-Shirts',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'White'],
-    inStock: true,
-  },
-  {
-    id: '5',
-    name: 'Leather Moto Jacket',
-    description: 'Premium black leather jacket with gold hardware. Asymmetric zip closure with quilted shoulder panels.',
-    price: 14999,
-    image: '/images/collection-1.jpg',
-    images: ['/images/collection-1.jpg', '/images/lookbook-2.jpg'],
-    category: 'Jackets',
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Black'],
-    inStock: true,
-    isNew: true,
-  },
-  {
-    id: '6',
-    name: 'Statement Chain',
-    description: 'Bold gold-tone chain necklace with signature pendant. Stainless steel construction with premium gold plating.',
-    price: 3499,
-    image: '/images/collection-2.jpg',
-    images: ['/images/collection-2.jpg', '/images/lookbook-3.jpg'],
-    category: 'Accessories',
-    sizes: ['One Size'],
-    colors: ['Gold'],
-    inStock: true,
-  },
-  {
-    id: '7',
-    name: 'Overcoat Noir',
-    description: 'Single-breasted wool overcoat in deep black. Full length with gold button closure and interior pocket system.',
-    price: 11999,
-    originalPrice: 13999,
-    image: '/images/custom-overcoat.jpg',
-    images: ['/images/custom-overcoat.jpg', '/images/lookbook-4.jpg'],
-    category: 'Outerwear',
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Black', 'Charcoal'],
-    inStock: true,
-    isBestseller: true,
-  },
-  {
-    id: '8',
-    name: 'Signature Shirt',
-    description: 'Premium button-down shirt with gold contrast stitching. Slim fit with hidden placket and collar stays.',
-    price: 3999,
-    image: '/images/lookbook-5.jpg',
-    images: ['/images/lookbook-5.jpg', '/images/lookbook-1.jpg'],
-    category: 'Shirts',
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Black', 'White'],
-    inStock: true,
-  },
-];
 
 const initialCategories: Category[] = [
   { id: '1', name: 'Hoodies', description: 'Premium heavyweight cotton hoodies.' },
@@ -170,18 +64,15 @@ const initialCategories: Category[] = [
 
 const initialUsers: User[] = [];
 
-const initialAddresses: Address[] = [
-  { id: '1', name: 'Home', street: '123 Main St', city: 'Mumbai', state: 'MH', zip: '400001', isDefault: true },
-  { id: '2', name: 'Work', street: '456 Tech Park', city: 'Pune', state: 'MH', zip: '411001', isDefault: false },
-];
+const initialAddresses: Address[] = [];
 
 const initialOrders: Order[] = [
-  { id: 'ORD-001', date: '2026-07-28', status: 'Delivered', total: 4999, shippingAddress: initialAddresses[0], items: [] },
-  { id: 'ORD-002', date: '2026-08-01', status: 'Processing', total: 8999, shippingAddress: initialAddresses[1], items: [] },
+  { id: 'ORD-001', date: '2026-07-28', status: 'Delivered', total: 4999, shippingAddress: { id: 'd1', name: 'Home', street: '123 Main St', city: 'Mumbai', state: 'MH', zip: '400001', isDefault: true }, items: [] },
+  { id: 'ORD-002', date: '2026-08-01', status: 'Processing', total: 8999, shippingAddress: { id: 'd2', name: 'Work', street: '456 Tech Park', city: 'Pune', state: 'MH', zip: '411001', isDefault: false }, items: [] },
 ];
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [users, setUsers] = useState<User[]>(initialUsers);
 
@@ -195,6 +86,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem('varenayam_token');
+  });
+
+  // Initialize user from localStorage if exists
+  useEffect(() => {
+    const storedUser = localStorage.getItem('varenayam_user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Failed to parse user from local storage');
+      }
+    }
+  }, []);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -232,11 +138,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Fetch on mount
+  // Fetch on mount and on window focus (for live updates across tabs)
   useEffect(() => {
-    fetchProducts();
-    fetchOrders();
-    fetchUsers();
+    const fetchAll = () => {
+      fetchProducts();
+      fetchOrders();
+      fetchUsers();
+    };
+    
+    fetchAll();
+
+    window.addEventListener('focus', fetchAll);
+    return () => window.removeEventListener('focus', fetchAll);
   }, [fetchProducts, fetchOrders, fetchUsers]);
 
   const addProduct = useCallback(async (product: Product) => {
@@ -249,9 +162,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (res.ok) {
         const newProduct = await res.json();
         setProducts(prev => [...prev, newProduct]);
+        return true;
       }
-    } catch (e) {
+      
+      const errorText = await res.text();
+      console.error('Add product failed with status:', res.status, errorText);
+      alert('Backend Error Details: ' + errorText);
+      return false;
+    } catch (e: any) {
       console.error('Add product failed', e);
+      alert('Network/Fetch Error: ' + e.message);
+      return false;
     }
   }, []);
 
@@ -265,9 +186,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (res.ok) {
         const updated = await res.json();
         setProducts(prev => prev.map(p => p.id === id ? updated : p));
+        return true;
       }
+      return false;
     } catch (e) {
       console.error('Update product failed', e);
+      return false;
     }
   }, []);
 
@@ -276,14 +200,38 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const res = await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setProducts(prev => prev.filter(p => p.id !== id));
+        return true;
       }
+      return false;
     } catch (e) {
       console.error('Delete product failed', e);
+      return false;
     }
   }, []);
 
-  const addOrder = useCallback((order: Order) => {
-    setOrders(prev => [...prev, order]);
+  const addOrder = useCallback(async (order: Order) => {
+    try {
+      const backendOrder = {
+        ...order,
+        user: order.user,
+        items: order.items.map(item => ({
+          ...item,
+          product: item.product.id
+        }))
+      };
+
+      const res = await fetch(`${API_URL}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(backendOrder)
+      });
+      if (res.ok) {
+        // Optimistic update with frontend object
+        setOrders(prev => [order, ...prev]);
+      }
+    } catch (e) {
+      console.error('Add order failed', e);
+    }
   }, []);
 
   const updateOrderStatus = useCallback(async (id: string, status: string) => {
@@ -346,6 +294,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.error('Delete user failed', e);
     }
+  }, []);
+
+  const addAddress = useCallback((address: Address) => {
+    setAddresses(prev => {
+      const newAddress = { ...address, isDefault: prev.length === 0 };
+      return [...prev, newAddress];
+    });
   }, []);
 
   const addToCart = useCallback((product: Product, size: string, color: string, quantity = 1): boolean => {
@@ -422,8 +377,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return wishlist.some(p => p.id === productId);
   }, [wishlist]);
 
-  const login = useCallback((userData: User) => setUser(userData), []);
-  const logout = useCallback(() => setUser(null), []);
+  const login = useCallback((userData: User, userToken: string) => {
+    setUser(userData);
+    setToken(userToken);
+    localStorage.setItem('varenayam_user', JSON.stringify(userData));
+    localStorage.setItem('varenayam_token', userToken);
+    if (userData.role === 'Admin') {
+      localStorage.setItem('varenayam_admin_auth', 'true');
+    }
+  }, []);
+
+  const logout = useCallback(() => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('varenayam_user');
+    localStorage.removeItem('varenayam_token');
+    localStorage.removeItem('varenayam_admin_auth');
+  }, []);
 
   const cartTotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -443,6 +413,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         isSidebarOpen,
         searchQuery,
         isLoginPopupOpen,
+        token,
         addToCart,
         removeFromCart,
         updateCartQuantity,
@@ -468,6 +439,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         deleteCategory,
         addUser,
         deleteUser,
+        addAddress,
         cartTotal,
         cartCount,
       }}
@@ -483,4 +455,4 @@ export function useStore() {
   return context;
 }
 
-export { initialProducts, initialCategories, initialUsers };
+export { initialCategories, initialUsers };

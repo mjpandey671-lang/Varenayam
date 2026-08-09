@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import Navigation from '@/sections/Navigation';
 import Footer from '@/sections/Footer';
@@ -12,21 +13,26 @@ const menuItems = [
 ];
 
 function OrdersView() {
-  const { orders } = useStore();
+  const { orders, user } = useStore();
+  const myOrders = orders.filter(order => {
+    if (!order.user) return false;
+    const orderUserId = typeof order.user === 'string' ? order.user : (order.user.id || order.user._id);
+    return String(orderUserId) === String(user?.id);
+  });
   return (
     <div className="max-w-4xl mx-auto">
       <Link to="/account" className="flex items-center gap-2 text-gold hover:text-white mb-6 transition-colors">
         <ArrowLeft size={16} /> Back to Account
       </Link>
       <h2 className="font-display text-2xl text-white mb-6">My Orders</h2>
-      {orders.length === 0 ? (
+      {myOrders.length === 0 ? (
         <div className="bg-dark-surface rounded-lg border border-white/5 p-8 text-center">
           <ShoppingBag size={36} className="mx-auto text-white/20 mb-3" />
           <p className="text-white/40">No orders found.</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {orders.map(order => (
+          {myOrders.map(order => (
             <div key={order.id} className="bg-dark-surface p-6 rounded-lg border border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <p className="text-white font-medium">Order #{order.id}</p>
@@ -47,7 +53,25 @@ function OrdersView() {
 }
 
 function AddressesView() {
-  const { addresses } = useStore();
+  const { addresses, addAddress } = useStore();
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleAdd = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const newAddress = {
+      id: Date.now().toString(),
+      name: formData.get('name') as string,
+      street: formData.get('street') as string,
+      city: formData.get('city') as string,
+      state: formData.get('state') as string,
+      zip: formData.get('zip') as string,
+      isDefault: false
+    };
+    addAddress(newAddress);
+    setIsAdding(false);
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <Link to="/account" className="flex items-center gap-2 text-gold hover:text-white mb-6 transition-colors">
@@ -55,20 +79,44 @@ function AddressesView() {
       </Link>
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-display text-2xl text-white">My Addresses</h2>
-        <button className="gold-border-btn text-xs py-2 px-4">Add New</button>
+        {!isAdding && <button onClick={() => setIsAdding(true)} className="gold-border-btn text-xs py-2 px-4">Add New</button>}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {addresses.map(addr => (
-          <div key={addr.id} className="bg-dark-surface p-6 rounded-lg border border-white/5 relative">
-            {addr.isDefault && (
-              <span className="absolute top-4 right-4 text-[10px] bg-gold text-black font-bold px-2 py-1 rounded">DEFAULT</span>
-            )}
-            <p className="text-white font-medium mb-1">{addr.name}</p>
-            <p className="text-white/60 text-sm">{addr.street}</p>
-            <p className="text-white/60 text-sm">{addr.city}, {addr.state} {addr.zip}</p>
+
+      {isAdding ? (
+        <form onSubmit={handleAdd} className="bg-dark-surface p-6 rounded-lg border border-white/5 space-y-4">
+          <h3 className="text-white font-medium mb-2">Add New Address</h3>
+          <input required name="name" placeholder="Address Name (e.g. Home, Office)" className="w-full bg-black border border-white/10 rounded p-3 text-white focus:border-gold outline-none" />
+          <input required name="street" placeholder="Street Address" className="w-full bg-black border border-white/10 rounded p-3 text-white focus:border-gold outline-none" />
+          <div className="grid grid-cols-2 gap-4">
+            <input required name="city" placeholder="City" className="w-full bg-black border border-white/10 rounded p-3 text-white focus:border-gold outline-none" />
+            <input required name="state" placeholder="State" className="w-full bg-black border border-white/10 rounded p-3 text-white focus:border-gold outline-none" />
           </div>
-        ))}
-      </div>
+          <input required name="zip" placeholder="PIN Code" className="w-full bg-black border border-white/10 rounded p-3 text-white focus:border-gold outline-none" />
+          <div className="flex gap-4 mt-4">
+            <button type="button" onClick={() => setIsAdding(false)} className="gold-border-btn flex-1">Cancel</button>
+            <button type="submit" className="gold-filled-btn flex-1">Save Address</button>
+          </div>
+        </form>
+      ) : addresses.length === 0 ? (
+        <div className="bg-dark-surface rounded-lg border border-white/5 p-8 text-center">
+          <MapPin size={36} className="mx-auto text-white/20 mb-3" />
+          <p className="text-white/40 mb-6">You haven't saved any addresses yet.</p>
+          <button onClick={() => setIsAdding(true)} className="gold-filled-btn">Add Your First Address</button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {addresses.map(addr => (
+            <div key={addr.id} className="bg-dark-surface p-6 rounded-lg border border-white/5 relative">
+              {addr.isDefault && (
+                <span className="absolute top-4 right-4 text-[10px] bg-gold text-black font-bold px-2 py-1 rounded">DEFAULT</span>
+              )}
+              <p className="text-white font-medium mb-1">{addr.name}</p>
+              <p className="text-white/60 text-sm">{addr.street}</p>
+              <p className="text-white/60 text-sm">{addr.city}, {addr.state} {addr.zip}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -145,14 +193,15 @@ export default function Account() {
                 <div>
                   <h1 className="font-display text-2xl md:text-3xl text-white">{user.name}</h1>
                   <p className="text-white/40 text-sm mt-1">{user.email}</p>
-                  <p className="text-gold/60 text-xs mt-1">Premium Member</p>
                 </div>
               </div>
             </div>
 
             {/* Menu Grid */}
             <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-              {menuItems.map((item) => (
+              {menuItems
+                .filter(item => !(user.role === 'Admin' && item.label === 'Addresses'))
+                .map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
@@ -170,7 +219,7 @@ export default function Account() {
               ))}
 
               {/* Admin Panel Link */}
-              {user.email === 'admin@varenayam.com' && (
+              {user.role === 'Admin' && (
                 <Link
                   to="/admin"
                   className="flex items-center gap-4 p-5 bg-gold/10 rounded-lg border border-gold/30 hover:border-gold transition-all group md:col-span-2"

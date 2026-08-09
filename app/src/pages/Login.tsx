@@ -7,33 +7,49 @@ import { Eye, EyeOff, LogIn } from 'lucide-react';
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useStore();
-  const [email, setEmail] = useState('');
+  const [emailOrMobile, setEmailOrMobile] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulate login
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // If admin logs in from the main website, redirect them to the admin panel
-      const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'mjpandey671@gmail.com';
-      const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'Pandey@555';
-      
-      if (email === adminEmail && password === adminPassword) {
-        localStorage.setItem('varenayam_admin_auth', 'true');
-        login({ id: '0', name: 'Admin', email }); // Set user context too
-        navigate('/admin');
-        return;
-      }
+    try {
+      const res = await fetch(import.meta.env.DEV ? 'http://localhost:5000/api/auth/login' : '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailOrMobile, password }),
+      });
 
-      login({ id: '1', name: 'Viren', email });
-      navigate('/');
-    }, 1000);
+      const data = await res.json();
+
+      if (res.ok) {
+        setSuccess('Login Successful! Redirecting...');
+        login(
+          { id: data.id, name: data.name, email: data.email, mobileNumber: data.mobileNumber, role: data.role }, 
+          data.token
+        );
+        
+        setTimeout(() => {
+          if (data.role === 'Admin') {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
+        }, 1000);
+      } else {
+        setError(data.message || 'Invalid Email/Mobile or Password');
+      }
+    } catch (err) {
+      setError('Network error. Make sure the backend server is running.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -53,13 +69,25 @@ export default function Login() {
           <div className="gradient-border">
             <div className="gradient-inner p-8">
               <form onSubmit={handleSubmit} className="space-y-5">
+                {error && (
+                  <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded text-center font-medium">
+                    {error}
+                  </div>
+                )}
+                
+                {success && (
+                  <div className="bg-green-500/10 border border-green-500/50 text-green-500 text-sm p-3 rounded text-center font-medium">
+                    {success}
+                  </div>
+                )}
+                
                 <div>
-                  <label className="text-white/60 text-xs uppercase tracking-wider mb-2 block">Email</label>
+                  <label className="text-white/60 text-xs uppercase tracking-wider mb-2 block">Email or Mobile Number</label>
                   <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
+                    type="text"
+                    value={emailOrMobile}
+                    onChange={(e) => setEmailOrMobile(e.target.value)}
+                    placeholder="Enter email or mobile"
                     required
                     className="w-full bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none transition-colors text-sm"
                   />

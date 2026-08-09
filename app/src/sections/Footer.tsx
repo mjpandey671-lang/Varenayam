@@ -11,23 +11,20 @@ const footerLinks = {
   ],
   help: [
     { label: 'FAQs', path: '/faqs' },
-    { label: 'Shipping Info', path: '/shipping' },
-    { label: 'Returns & Exchanges', path: '/returns' },
     { label: 'Size Guide', path: '/size-guide' },
-    { label: 'Track Order', path: '/track-order' },
+    { label: 'Track Order', path: '/orders' },
+    { label: 'Returns & Exchanges', path: '/refund' },
   ],
   company: [
     { label: 'About Us', path: '/about' },
-    { label: 'Careers', path: '/careers' },
-    { label: 'Press', path: '/press' },
-    { label: 'Sustainability', path: '/sustainability' },
     { label: 'Contact', path: '/contact' },
   ],
   policies: [
     { label: 'Privacy Policy', path: '/privacy' },
     { label: 'Terms of Service', path: '/terms' },
-    { label: 'Cookie Policy', path: '/cookies' },
     { label: 'Refund Policy', path: '/refund' },
+    { label: 'Shipping Policy', path: '/shipping-policy' },
+    { label: 'Cancellation Policy', path: '/cancellation' },
   ],
 };
 
@@ -154,7 +151,7 @@ export default function Footer() {
           </div>
           <div>
             <span className="text-white/30 text-xs uppercase tracking-wider">Address</span>
-            <p className="text-white/60 text-sm mt-1">makarba Ahemdabad pin -380051</p>
+            <p className="text-white/60 text-sm mt-1">Makarba, Ahmedabad, Gujarat - 380051</p>
           </div>
         </div>
 

@@ -136,6 +136,15 @@
     animation: blink 0.8s step-end infinite;
     text-shadow: 0 0 10px rgba(212, 175, 55, 0.8), 0 0 20px rgba(212, 175, 55, 0.4);
   }
+
+  .text-gold-gradient {
+    background: linear-gradient(to bottom, #E0B85C 0%, #FDF2A9 30%, #A77322 70%, #E0B85C 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+  }
 }
 
 @keyframes shimmerSweep {

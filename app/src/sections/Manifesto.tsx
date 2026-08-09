@@ -30,11 +30,11 @@ function GoldenTypewriter({ text, speed = 80 }: { text: string; speed?: number }
       setIsComplete(true);
       return;
     }
-    const timer = setInterval(() => {
-      setDisplayedText(prev => prev + text[currentIndex]);
+    const timer = setTimeout(() => {
+      setDisplayedText(text.substring(0, currentIndex + 1));
       setCurrentIndex(prev => prev + 1);
     }, speed);
-    return () => clearInterval(timer);
+    return () => clearTimeout(timer);
   }, [hasStarted, currentIndex, text, speed]);
 
   return (
@@ -60,7 +60,7 @@ export default function Manifesto() {
           { opacity: 0, scale: 0.8 },
           {
             opacity: 1, scale: 1, duration: 1.2, ease: 'power3.out',
-            scrollTrigger: { trigger: sectionRef.current, start: 'top 60%', toggleActions: 'play none none none' }
+            scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', toggleActions: 'play none none none' }
           }
         );
       }
@@ -68,16 +68,16 @@ export default function Manifesto() {
     return () => ctx.revert();
   }, []);
 
-  const manifestoText = "Born to Stand out";
+  const manifestoText = "BORN TO STAND OUT";
 
   return (
     <section
       ref={sectionRef}
-      className="relative py-32 md:py-48 lg:py-56 bg-black overflow-hidden"
+      className="relative py-16 md:py-24 lg:py-32 bg-black overflow-hidden"
     >
       {/* Subtle gold radial gradient at center */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-radial-gold opacity-[0.03] rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-radial-gold opacity-[0.03] rounded-full" />
       </div>
 
       <div ref={decorRef} className="relative px-[4vw] max-w-5xl mx-auto text-center">
@@ -87,12 +87,12 @@ export default function Manifesto() {
         </div>
 
         {/* Manifesto text with typewriter effect */}
-        <div className="mb-10">
+        <div className="mb-10 min-h-[40px] md:min-h-[60px] flex items-center justify-center">
           <GoldenTypewriter text={manifestoText} speed={70} />
         </div>
 
         {/* Brand Name */}
-        <p className="font-display text-gold text-sm md:text-base tracking-[0.5em] uppercase mt-12">
+        <p className="font-display text-gold-gradient text-sm md:text-base tracking-[0.5em] uppercase mt-12">
           VARENAYAM
         </p>
 

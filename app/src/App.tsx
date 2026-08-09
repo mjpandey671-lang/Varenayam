@@ -13,6 +13,7 @@ import About from '@/pages/About'
 import Contact from '@/pages/Contact'
 import SizeGuide from '@/pages/SizeGuide'
 import Account from '@/pages/Account'
+import PolicyPage from '@/pages/PolicyPage'
 import AdminLayout from '@/pages/admin/AdminLayout'
 import AdminDashboard from '@/pages/admin/AdminDashboard'
 import AdminProducts from '@/pages/admin/AdminProducts'
@@ -44,6 +45,14 @@ export default function App() {
         <Route path="/orders" element={<Account />} />
         <Route path="/profile" element={<Account />} />
         <Route path="/addresses" element={<Account />} />
+        
+        {/* Policy & Help Routes */}
+        <Route path="/faqs" element={<PolicyPage title="Frequently Asked Questions" />} />
+        <Route path="/privacy" element={<PolicyPage title="Privacy Policy" />} />
+        <Route path="/terms" element={<PolicyPage title="Terms of Service" />} />
+        <Route path="/refund" element={<PolicyPage title="Returns & Exchanges" />} />
+        <Route path="/shipping-policy" element={<PolicyPage title="Shipping Policy" />} />
+        <Route path="/cancellation" element={<PolicyPage title="Cancellation Policy" />} />
         
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />

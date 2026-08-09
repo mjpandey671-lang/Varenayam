@@ -5,9 +5,12 @@ import { Plus, Edit2, Trash2 } from 'lucide-react';
 export default function AdminProducts() {
   const { products, deleteProduct } = useStore();
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      deleteProduct(id);
+      const success = await deleteProduct(id);
+      if (!success) {
+        alert('Failed to delete product. Please try again.');
+      }
     }
   };
 

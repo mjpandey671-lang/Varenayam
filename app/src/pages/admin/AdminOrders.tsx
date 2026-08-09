@@ -6,6 +6,10 @@ import type { Order } from '@/types';
 export default function AdminOrders() {
   const { orders, updateOrderStatus } = useStore();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  
+  // Filters
+  const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [dateFilter, setDateFilter] = useState<string>('');
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     await updateOrderStatus(orderId, newStatus);
@@ -22,16 +26,89 @@ export default function AdminOrders() {
     }
   };
 
+  // Stats
+  const pendingCount = orders.filter(o => o.status === 'Processing').length;
+  const confirmedCount = orders.filter(o => o.status === 'Confirmed').length;
+  const cancelledCount = orders.filter(o => o.status === 'Cancelled').length;
+  const todayCount = orders.filter(o => new Date(o.date).toISOString().split('T')[0] === new Date().toISOString().split('T')[0]).length;
+
+  // Filtered Orders
+  const filteredOrders = orders.filter(order => {
+    let match = true;
+    if (statusFilter !== 'All' && order.status !== statusFilter) match = false;
+    if (dateFilter) {
+      const orderDate = new Date(order.date).toISOString().split('T')[0];
+      if (orderDate !== dateFilter) match = false;
+    }
+    return match;
+  });
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-white mb-2">Manage Orders</h2>
-        <p className="text-white/60">View and update customer orders.</p>
+        <p className="text-white/60">View and filter customer orders.</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-dark-surface border border-white/5 p-4 rounded-lg">
+          <div className="text-white/60 text-sm mb-1">Today's Orders</div>
+          <div className="text-2xl font-bold text-white">{todayCount}</div>
+        </div>
+        <div className="bg-dark-surface border border-white/5 p-4 rounded-lg">
+          <div className="text-white/60 text-sm mb-1">Pending</div>
+          <div className="text-2xl font-bold text-yellow-500">{pendingCount}</div>
+        </div>
+        <div className="bg-dark-surface border border-white/5 p-4 rounded-lg">
+          <div className="text-white/60 text-sm mb-1">Confirmed</div>
+          <div className="text-2xl font-bold text-blue-500">{confirmedCount}</div>
+        </div>
+        <div className="bg-dark-surface border border-white/5 p-4 rounded-lg">
+          <div className="text-white/60 text-sm mb-1">Cancelled</div>
+          <div className="text-2xl font-bold text-red-500">{cancelledCount}</div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-4 bg-dark-surface border border-white/5 p-4 rounded-lg">
+        <div className="flex-1">
+          <label className="block text-xs text-white/60 mb-1">Filter by Status</label>
+          <select 
+            className="w-full bg-black/40 border border-white/10 text-white rounded-none px-3 py-2 text-sm focus:outline-none focus:border-gold"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="All">All Statuses</option>
+            <option value="Processing">Processing (Pending)</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div className="flex-1">
+          <label className="block text-xs text-white/60 mb-1">Filter by Date</label>
+          <input 
+            type="date"
+            className="w-full bg-black/40 border border-white/10 text-white rounded-none px-3 py-2 text-sm focus:outline-none focus:border-gold [color-scheme:dark]"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+          />
+        </div>
+        <div className="flex items-end">
+          <button 
+            onClick={() => { setStatusFilter('All'); setDateFilter(''); }}
+            className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-sm transition-colors border border-white/10"
+          >
+            Clear Filters
+          </button>
+        </div>
       </div>
 
       <div className="bg-dark-surface border border-white/5 rounded-lg overflow-hidden">
-        {orders.length === 0 ? (
-          <div className="p-8 text-center text-white/40">No orders found.</div>
+        {filteredOrders.length === 0 ? (
+          <div className="p-8 text-center text-white/40">No orders found for selected filters.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -39,23 +116,36 @@ export default function AdminOrders() {
                 <tr>
                   <th className="p-4 font-medium">Order ID</th>
                   <th className="p-4 font-medium">Date</th>
-                  <th className="p-4 font-medium">Customer Address</th>
+                  <th className="p-4 font-medium">Customer Details</th>
                   <th className="p-4 font-medium">Total Amount</th>
                   <th className="p-4 font-medium">Status</th>
                   <th className="p-4 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="p-4 text-white font-medium">#{order.id.slice(-6).toUpperCase()}</td>
                     <td className="p-4 text-white/60 text-sm">
                       {new Date(order.date).toLocaleDateString()}
                     </td>
-                    <td className="p-4 text-white/60 text-sm max-w-[200px] truncate">
-                      {order.shippingAddress?.name} - {order.shippingAddress?.city}
+                    <td className="p-4 text-sm max-w-[200px] truncate">
+                      {order.user && typeof order.user === 'object' ? (
+                        <>
+                          <span className="text-white block font-medium">{order.user.name || 'Unknown'}</span>
+                          {order.user.email && <span className="text-white/40 block text-xs">{order.user.email}</span>}
+                          {order.user.mobileNumber && <span className="text-white/40 block text-xs">{order.user.mobileNumber}</span>}
+                        </>
+                      ) : (
+                        <span className="text-white/40">Guest</span>
+                      )}
                     </td>
-                    <td className="p-4 text-white font-bold">Rs. {order.total.toLocaleString()}</td>
+                    <td className="p-4">
+                      <div className="text-white font-bold">Rs. {order.total.toLocaleString()}</div>
+                      <div className="text-white/40 text-xs mt-1 px-2 py-0.5 bg-white/5 inline-block rounded border border-white/10">
+                        {order.paymentMethod || 'COD'}
+                      </div>
+                    </td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">
                         {getStatusIcon(order.status)}

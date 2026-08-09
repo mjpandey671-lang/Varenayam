@@ -1,25 +1,49 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Lock } from 'lucide-react';
+import { useStore } from '@/hooks/useStore';
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('');
+  const { login } = useStore();
+  const [emailOrMobile, setEmailOrMobile] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
     
-    const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'mjpandey671@gmail.com';
-    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'Pandey@555';
-    
-    // Check against configured credentials
-    if (email === adminEmail && password === adminPassword) {
-      localStorage.setItem('varenayam_admin_auth', 'true');
-      navigate('/admin');
-    } else {
-      setError('Invalid email or password');
+    try {
+      const res = await fetch(import.meta.env.DEV ? 'http://localhost:5000/api/auth/login' : '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailOrMobile, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.role === 'Admin') {
+        setSuccess('Login Successful! Redirecting...');
+        login(
+          { id: data.id, name: data.name, email: data.email, mobileNumber: data.mobileNumber, role: data.role }, 
+          data.token
+        );
+        setTimeout(() => {
+          navigate('/admin');
+        }, 1000);
+      } else if (res.ok && data.role !== 'Admin') {
+        setError('Access denied. Admin only.');
+      } else {
+        setError(data.message || 'Invalid Email/Mobile or Password');
+      }
+    } catch (err) {
+      setError('Network error. Make sure the backend server is running.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -35,18 +59,24 @@ export default function AdminLogin() {
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded mb-6 text-center">
+          <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded mb-6 text-center font-medium">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-500/10 border border-green-500/50 text-green-500 text-sm p-3 rounded mb-6 text-center font-medium">
+            {success}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-white/80 uppercase tracking-wider block">Email Address</label>
+            <label className="text-sm font-semibold text-white/80 uppercase tracking-wider block">Email or Mobile Number</label>
             <input 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text" 
+              value={emailOrMobile}
+              onChange={(e) => setEmailOrMobile(e.target.value)}
               className="w-full bg-black border border-white/10 rounded px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors"
               required
             />

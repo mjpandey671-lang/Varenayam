@@ -11,18 +11,21 @@ import {
   Briefcase, 
   FileText, 
   MessageSquare, 
-  User, 
+  User as UserIcon, 
   LogOut,
   Activity,
 } from 'lucide-react';
 import Navigation from '@/sections/Navigation';
+import { useStore } from '@/hooks/useStore';
 
 export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { user, logout } = useStore();
+  
   // Basic auth check
-  const isAuthenticated = localStorage.getItem('varenayam_admin_auth') === 'true';
+  const isAuthenticated = localStorage.getItem('varenayam_admin_auth') === 'true' && user?.role === 'Admin';
 
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" replace />;
@@ -30,7 +33,7 @@ export default function AdminLayout() {
 
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
-    localStorage.removeItem('varenayam_admin_auth');
+    logout();
     navigate('/admin/login');
   };
 
@@ -44,7 +47,7 @@ export default function AdminLayout() {
     { name: 'Manage Team', path: '/admin/team', icon: Users },
     { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
     { name: 'Contact Submissions', path: '/admin/contacts', icon: MessageSquare },
-    { name: 'Users', path: '/admin/users', icon: User },
+    { name: 'Users', path: '/admin/users', icon: UserIcon },
   ];
 
   return (

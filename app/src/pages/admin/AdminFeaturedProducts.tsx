@@ -1,6 +1,6 @@
 import { useStore } from '@/hooks/useStore';
 import { Link } from 'react-router';
-import { Star, StarOff, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Star, StarOff } from 'lucide-react';
 
 export default function AdminFeaturedProducts() {
   const { products, updateProduct, deleteProduct } = useStore();
@@ -9,23 +9,13 @@ export default function AdminFeaturedProducts() {
     await updateProduct(id, { isFeatured: !currentStatus });
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      deleteProduct(id);
-    }
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-black uppercase tracking-widest text-white">Featured Products</h2>
-        <Link 
-          to="/admin/products/add" 
-          className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded font-bold uppercase tracking-wider text-sm hover:bg-gold-light transition-colors"
-        >
-          <Plus size={18} />
-          Add Product
-        </Link>
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h2 className="text-2xl font-black uppercase tracking-widest text-white">Featured Products</h2>
+          <p className="text-white/40 text-sm mt-1">Select which products appear on the homepage</p>
+        </div>
       </div>
 
       <div className="bg-[#111] rounded-xl border border-white/5 overflow-hidden">
@@ -63,20 +53,6 @@ export default function AdminFeaturedProducts() {
                         title={product.isFeatured ? 'Remove from Featured' : 'Add to Featured'}
                       >
                         {product.isFeatured ? <Star size={16} className="fill-gold" /> : <StarOff size={16} />}
-                      </button>
-                      <Link 
-                        to={`/admin/products/edit/${product.id}`}
-                        className="p-2 bg-white/10 text-white rounded hover:bg-white/20 transition-colors"
-                        title="Edit"
-                      >
-                        <Edit2 size={16} />
-                      </Link>
-                      <button 
-                        onClick={() => handleDelete(product.id)}
-                        className="p-2 bg-red-500/10 text-red-500 rounded hover:bg-red-500/20 transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>

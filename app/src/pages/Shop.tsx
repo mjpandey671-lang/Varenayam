@@ -71,7 +71,7 @@ export default function Shop() {
     // recommended does no sorting
 
     return result;
-  }, [selectedCategories, selectedColors, selectedSizes, selectedPriceRanges, sortBy]);
+  }, [products, selectedCategories, selectedColors, selectedSizes, selectedPriceRanges, sortBy]);
 
   useEffect(() => {
     if (gridRef.current) {

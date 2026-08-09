@@ -64,26 +64,90 @@ export default function AdminProductForm() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          setFormData(prev => ({ ...prev, image: dataUrl }));
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitMessage(null);
     
     // Basic validation
     if (!formData.name || !formData.price || !formData.image) {
-      alert('Please fill all required fields (Name, Price, Image URL)');
+      setSubmitMessage({ type: 'error', text: 'Please fill all required fields (Name, Price, Image)' });
       return;
     }
 
-    if (isEditing && id) {
-      updateProduct(id, formData);
-    } else {
-      const newProduct: Product = {
-        ...(formData as Required<Product>),
-        id: Date.now().toString(), // simple unique id
-        images: formData.images?.length ? formData.images : [formData.image!],
-      };
-      addProduct(newProduct);
+    if (!formData.description) {
+      setSubmitMessage({ type: 'error', text: 'Please provide a description.' });
+      return;
     }
-    navigate('/admin/products');
+
+    setIsSubmitting(true);
+    let success = false;
+    try {
+      if (isEditing && id) {
+        success = await updateProduct(id, formData);
+      } else {
+        const newProduct: Product = {
+          ...(formData as Required<Product>),
+          id: Date.now().toString(), // Will be ignored by MongoDB
+          images: formData.images?.length ? formData.images : [formData.image!],
+        };
+        success = await addProduct(newProduct);
+      }
+
+      if (success) {
+        setSubmitMessage({ type: 'success', text: 'Product successfully added!' });
+        setTimeout(() => {
+          navigate('/admin/products');
+        }, 1500);
+      } else {
+        setSubmitMessage({ type: 'error', text: 'Failed to save product. Please check your data or try again.' });
+      }
+    } catch (err) {
+      setSubmitMessage({ type: 'error', text: 'An unexpected error occurred.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -161,19 +225,26 @@ export default function AdminProductForm() {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-semibold text-white/80 uppercase tracking-wider">Main Image URL *</label>
-              <input 
-                type="text" 
-                name="image" 
-                value={formData.image || ''} 
-                onChange={handleChange}
-                placeholder="/images/product.jpg or https://..."
-                className="w-full bg-black border border-white/10 rounded px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors"
-                required
-              />
+              <label className="text-sm font-semibold text-white/80 uppercase tracking-wider">Main Image *</label>
+              <div className="flex items-center gap-4">
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="w-full bg-black border border-white/10 rounded px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-bold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer"
+                  required={!formData.image}
+                />
+              </div>
               {formData.image && (
-                <div className="mt-4 w-32 h-40 rounded border border-white/10 overflow-hidden">
+                <div className="mt-4 w-32 h-40 rounded border border-white/10 overflow-hidden relative group">
                   <img src={formData.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.src = 'https://placehold.co/400x500/111/fff?text=Invalid+Image')} />
+                  <button 
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
+                    className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-bold"
+                  >
+                    Remove
+                  </button>
                 </div>
               )}
             </div>
@@ -236,13 +307,28 @@ export default function AdminProductForm() {
           </div>
         </div>
 
-        <div className="flex justify-end gap-4">
-          <Link to="/admin/products" className="px-6 py-3 rounded bg-white/10 text-white font-bold uppercase tracking-wider text-sm hover:bg-white/20 transition-colors">
-            Cancel
-          </Link>
-          <button type="submit" className="px-6 py-3 rounded bg-gold text-black font-bold uppercase tracking-wider text-sm hover:bg-gold-light transition-colors">
-            {isEditing ? 'Save Changes' : 'Create Product'}
-          </button>
+        <div className="flex flex-col items-end gap-4">
+          {submitMessage && (
+            <div className={`px-4 py-2 rounded text-sm font-bold ${
+              submitMessage.type === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/50' : 'bg-red-500/20 text-red-400 border border-red-500/50'
+            }`}>
+              {submitMessage.text}
+            </div>
+          )}
+          <div className="flex justify-end gap-4">
+            <Link to="/admin/products" className="px-6 py-3 rounded bg-white/10 text-white font-bold uppercase tracking-wider text-sm hover:bg-white/20 transition-colors">
+              Cancel
+            </Link>
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className={`px-6 py-3 rounded font-bold uppercase tracking-wider text-sm transition-colors ${
+                isSubmitting ? 'bg-gold/50 text-black/50 cursor-not-allowed' : 'bg-gold text-black hover:bg-gold-light'
+              }`}
+            >
+              {isSubmitting ? 'Saving...' : (isEditing ? 'Save Changes' : 'Create Product')}
+            </button>
+          </div>
         </div>
       </form>
     </div>

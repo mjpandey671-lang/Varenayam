@@ -67,7 +67,7 @@ export default function Navigation() {
                 alt="VARENAYAM"
                 className="h-9 w-auto object-contain"
               />
-              <span className="font-bold text-gold text-lg tracking-wide">VARENAYAM</span>
+              <span className="font-bold text-gold-gradient text-lg tracking-wide">VARENAYAM</span>
             </Link>
           </div>
 
@@ -80,7 +80,7 @@ export default function Navigation() {
                 alt="VARENAYAM"
                 className="h-6 sm:h-8 w-auto object-contain"
               />
-              <span className="font-bold text-gold text-[13px] sm:text-base tracking-wide truncate">VARENAYAM</span>
+              <span className="font-bold text-gold-gradient text-[13px] sm:text-base tracking-wide truncate">VARENAYAM</span>
             </Link>
             
             {/* Desktop Links */}

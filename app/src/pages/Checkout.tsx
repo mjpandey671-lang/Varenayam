@@ -6,10 +6,36 @@ import { useStore } from '@/hooks/useStore';
 import { Check, CreditCard, Truck, ShieldCheck, ChevronRight } from 'lucide-react';
 
 export default function Checkout() {
-  const { cart, cartTotal, clearCart } = useStore();
+  const { cart, cartTotal, clearCart, addresses, addAddress, addOrder, user } = useStore();
   const [step, setStep] = useState(1);
   const [isPlacing, setIsPlacing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [isAddingNew, setIsAddingNew] = useState(addresses.length === 0);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>(addresses.length > 0 ? addresses[0].id : '');
+  const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'COD' | null>(null);
+
+  const shipping = cartTotal >= 4999 ? 0 : 199;
+  const total = cartTotal + shipping;
+
+  const handleShippingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isAddingNew) {
+      const formData = new FormData(e.target as HTMLFormElement);
+      const newAddress = {
+        id: Date.now().toString(),
+        name: formData.get('name') as string || 'Address',
+        street: formData.get('street') as string,
+        city: formData.get('city') as string,
+        state: formData.get('state') as string,
+        zip: formData.get('zip') as string,
+        isDefault: addresses.length === 0
+      };
+      addAddress(newAddress);
+      setSelectedAddressId(newAddress.id);
+      setIsAddingNew(false);
+    }
+    setStep(2);
+  };
 
   if (cart.length === 0 && !orderPlaced) {
     return (
@@ -30,6 +56,19 @@ export default function Checkout() {
   const handlePlaceOrder = () => {
     setIsPlacing(true);
     setTimeout(() => {
+      const shippingAddress = addresses.find(a => a.id === selectedAddressId) || addresses[0];
+      const newOrder = {
+        id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+        user: user?.id,
+        date: new Date().toISOString().split('T')[0],
+        status: 'Processing' as const,
+        paymentMethod: paymentMethod as 'UPI' | 'COD',
+        total,
+        items: [...cart],
+        shippingAddress
+      };
+      addOrder(newOrder);
+      
       setIsPlacing(false);
       setOrderPlaced(true);
       clearCart();
@@ -59,9 +98,6 @@ export default function Checkout() {
     );
   }
 
-  const shipping = cartTotal >= 4999 ? 0 : 199;
-  const total = cartTotal + shipping;
-
   return (
     <div className="bg-black min-h-screen pt-[105px]">
       <Navigation />
@@ -88,50 +124,111 @@ export default function Checkout() {
           {/* Main Form */}
           <div>
             {step === 1 && (
-              <div className="space-y-6">
+              <form onSubmit={handleShippingSubmit} className="space-y-6">
                 <h2 className="font-display text-xl text-white mb-4">Shipping Information</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input type="text" placeholder="First Name" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                  <input type="text" placeholder="Last Name" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                  <input type="email" placeholder="Email" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                  <input type="tel" placeholder="Phone Number" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                  <input type="text" placeholder="Address Line 1" className="md:col-span-2 bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                  <input type="text" placeholder="Address Line 2" className="md:col-span-2 bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                  <input type="text" placeholder="City" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                  <input type="text" placeholder="PIN Code" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                  <input type="text" placeholder="State" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                  <input type="text" placeholder="Country" defaultValue="India" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                </div>
-                <button onClick={() => setStep(2)} className="gold-filled-btn mt-4">
+                
+                {addresses.length > 0 && (
+                  <div className="space-y-4 mb-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-white/60 text-sm">Select Address</h3>
+                      {!isAddingNew && (
+                        <button type="button" onClick={() => setIsAddingNew(true)} className="text-gold text-sm hover:underline">
+                          + Add New Address
+                        </button>
+                      )}
+                    </div>
+                    
+                    {!isAddingNew && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {addresses.map(addr => (
+                          <div 
+                            key={addr.id} 
+                            onClick={() => setSelectedAddressId(addr.id)}
+                            className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedAddressId === addr.id ? 'border-gold bg-gold/5' : 'border-white/10 bg-dark-elevated hover:border-white/30'}`}
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <p className="text-white font-medium">{addr.name}</p>
+                              {selectedAddressId === addr.id && <Check size={16} className="text-gold" />}
+                            </div>
+                            <p className="text-white/60 text-sm">{addr.street}</p>
+                            <p className="text-white/60 text-sm">{addr.city}, {addr.state} {addr.zip}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {isAddingNew && (
+                  <>
+                    {addresses.length > 0 && (
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-white font-medium">Add New Address</h3>
+                        <button type="button" onClick={() => setIsAddingNew(false)} className="text-white/40 text-sm hover:text-white">
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <input type="text" name="name" required placeholder="Save Address As (e.g. Home)" className="md:col-span-2 bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
+                      <input type="text" name="street" required placeholder="Street Address" className="md:col-span-2 bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
+                      <input type="text" name="city" required placeholder="City" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
+                      <input type="text" name="zip" required placeholder="PIN Code" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
+                      <input type="text" name="state" required placeholder="State" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
+                      <input type="text" placeholder="Country" defaultValue="India" disabled className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white/50 bg-white/5 placeholder:text-white/20 focus:outline-none text-sm cursor-not-allowed" />
+                    </div>
+                  </>
+                )}
+                
+                <button type="submit" className="gold-filled-btn mt-4">
                   Continue to Payment
                 </button>
-              </div>
+              </form>
             )}
 
             {step === 2 && (
               <div className="space-y-6">
                 <h2 className="font-display text-xl text-white mb-4">Payment Method</h2>
                 <div className="space-y-3">
-                  {['Credit / Debit Card', 'UPI', 'Cash on Delivery'].map((method) => (
-                    <label key={method} className="flex items-center gap-4 p-4 bg-dark-elevated border border-white/10 rounded-lg cursor-pointer hover:border-gold/30 transition-colors">
-                      <input type="radio" name="payment" className="accent-gold" defaultChecked={method === 'Credit / Debit Card'} />
-                      <CreditCard size={20} className="text-gold" />
+                  {['UPI', 'Cash on Delivery'].map((method) => (
+                    <label key={method} className={`flex items-center gap-4 p-4 bg-dark-elevated border rounded-lg cursor-pointer transition-colors ${paymentMethod === (method === 'UPI' ? 'UPI' : 'COD') ? 'border-gold bg-white/5' : 'border-white/10 hover:border-gold/30'}`}>
+                      <input 
+                        type="radio" 
+                        name="payment" 
+                        className="accent-gold" 
+                        checked={paymentMethod === (method === 'UPI' ? 'UPI' : 'COD')} 
+                        onChange={() => setPaymentMethod(method === 'UPI' ? 'UPI' : 'COD')} 
+                      />
+                      <CreditCard size={20} className={paymentMethod === (method === 'UPI' ? 'UPI' : 'COD') ? 'text-gold' : 'text-white/40'} />
                       <span className="text-white text-sm">{method}</span>
                     </label>
                   ))}
                 </div>
-                <div className="mt-6">
-                  <h3 className="text-white/60 text-xs uppercase tracking-wider mb-3">Card Details</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" placeholder="Card Number" className="md:col-span-2 bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                    <input type="text" placeholder="Cardholder Name" className="md:col-span-2 bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                    <input type="text" placeholder="MM/YY" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
-                    <input type="text" placeholder="CVV" className="bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none text-sm" />
+                
+                {paymentMethod === 'UPI' && (
+                  <div className="mt-4 p-4 bg-dark-elevated border border-gold/30 rounded-lg">
+                    <p className="text-white/80 text-sm mb-2">Scan the QR code or pay using UPI ID</p>
+                    <div className="w-40 h-40 bg-white/10 border border-white/20 rounded flex items-center justify-center mb-4">
+                      <span className="text-white/40 text-xs text-center px-4">UPI QR Code<br/>(Placeholder)</span>
+                    </div>
+                    <p className="text-gold text-sm font-medium">varenayam@upi</p>
                   </div>
-                </div>
+                )}
+                
                 <div className="flex gap-3 mt-4">
                   <button onClick={() => setStep(1)} className="gold-border-btn">Back</button>
-                  <button onClick={() => setStep(3)} className="gold-filled-btn">Review Order</button>
+                  <button 
+                    onClick={() => {
+                      if (!paymentMethod) {
+                        toast.error('Please select a payment method');
+                        return;
+                      }
+                      setStep(3);
+                    }} 
+                    className="gold-filled-btn"
+                  >
+                    Review Order
+                  </button>
                 </div>
               </div>
             )}

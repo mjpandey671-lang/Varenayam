@@ -29,7 +29,8 @@ export interface WishlistItem {
 export interface User {
   id: string;
   name: string;
-  email: string;
+  email?: string;
+  mobileNumber?: string;
   role?: string;
   joinDate?: string;
 }
@@ -52,8 +53,10 @@ export interface Address {
 
 export interface Order {
   id: string;
+  user?: User | string | any;
   date: string;
-  status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'Confirmed';
+  paymentMethod: 'UPI' | 'COD';
   total: number;
   items: CartItem[];
   shippingAddress: Address;

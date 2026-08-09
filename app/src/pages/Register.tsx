@@ -9,23 +9,45 @@ export default function Register() {
   const { login } = useStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
     setIsLoading(true);
-    setTimeout(() => {
-      login({ id: '1', name, email });
+    setError('');
+
+    try {
+      const res = await fetch(import.meta.env.DEV ? 'http://localhost:5000/api/auth/register' : '/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, mobileNumber, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        login(
+          { id: data.id, name: data.name, email: data.email, mobileNumber: data.mobileNumber, role: data.role }, 
+          data.token
+        );
+        navigate('/');
+      } else {
+        setError(data.message || 'Registration failed');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
       setIsLoading(false);
-      navigate('/');
-    }, 1000);
+    }
   };
 
   return (
@@ -45,6 +67,12 @@ export default function Register() {
           <div className="gradient-border">
             <div className="gradient-inner p-8">
               <form onSubmit={handleSubmit} className="space-y-5">
+                {error && (
+                  <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded text-center">
+                    {error}
+                  </div>
+                )}
+                
                 <div>
                   <label className="text-white/60 text-xs uppercase tracking-wider mb-2 block">Full Name</label>
                   <input
@@ -58,13 +86,23 @@ export default function Register() {
                 </div>
 
                 <div>
-                  <label className="text-white/60 text-xs uppercase tracking-wider mb-2 block">Email</label>
+                  <label className="text-white/60 text-xs uppercase tracking-wider mb-2 block">Email (Optional)</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
-                    required
+                    className="w-full bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none transition-colors text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-white/60 text-xs uppercase tracking-wider mb-2 block">Mobile Number (Optional)</label>
+                  <input
+                    type="tel"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    placeholder="Your mobile number"
                     className="w-full bg-dark-elevated border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:border-gold focus:outline-none transition-colors text-sm"
                   />
                 </div>

@@ -49,11 +49,11 @@ export default function About() {
             <span className="text-gold/70 text-xs tracking-[0.3em] uppercase font-medium">Our Story</span>
             <h2 className="font-display text-3xl md:text-4xl text-white mt-3 mb-6">Redefining Luxury Streetwear</h2>
             <p className="text-white/50 leading-relaxed mb-4">
-              Founded in 2020, VARENAYAM emerged from a simple yet powerful idea: that luxury fashion should not be confined to tradition. 
+              Founded in 2026, VARENAYAM emerged from a simple yet powerful idea: that luxury fashion should not be confined to tradition. 
               We believe in the power of self-expression through meticulously crafted garments that tell a story.
             </p>
             <p className="text-white/50 leading-relaxed mb-4">
-              Our journey began in the heart of Mumbai, where a small team of designers and craftsmen came together with a shared vision 
+              Our journey began in the heart of Ahmedabad, where a small team of designers and craftsmen came together with a shared vision 
               — to create clothing that bridges the gap between haute couture and street culture.
             </p>
             <p className="text-white/50 leading-relaxed">

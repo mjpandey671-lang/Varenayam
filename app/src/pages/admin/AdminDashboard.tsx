@@ -14,7 +14,7 @@ import {
   Cell,
   Legend
 } from 'recharts';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 const revenueData = [
   { name: 'Jan', value: 12000 },
@@ -43,8 +43,32 @@ export default function AdminDashboard() {
     }));
   }, [products]);
 
+  const [realStats, setRealStats] = useState({ totalUsers: 0, activeUsers: 0 });
+  const { token } = useStore();
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch(import.meta.env.DEV ? 'http://localhost:5000/api/admin/stats/users' : '/api/admin/stats/users', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setRealStats(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch stats');
+      }
+    };
+    if (token) {
+      fetchStats();
+    }
+  }, [token]);
+
   // For the sake of prototype, we'll use realistic mock data for non-existent historical metrics
-  const totalUsers = 124;
+  const totalUsers = realStats.totalUsers;
   const totalOrders = 86;
   const totalRevenue = '₹1,69,000';
 
@@ -55,7 +79,7 @@ export default function AdminDashboard() {
       icon: Users, 
       iconBg: 'bg-[#18153A]', 
       iconColor: 'text-[#818CF8]',
-      trend: '12.5% from last month',
+      trend: `${realStats.activeUsers} active recently`,
       trendUp: true
     },
     { 
