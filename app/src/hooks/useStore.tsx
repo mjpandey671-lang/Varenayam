@@ -48,7 +48,7 @@ interface StoreActions {
   cartCount: number;
 }
 
-const API_URL = import.meta.env.DEV ? 'http://localhost:5000/api' : '/api';
+const API_URL = import.meta.env.DEV ? 'http://localhost:5000/api' : 'https://varenayam-bhnb.vercel.app/api';
 
 const StoreContext = createContext<(StoreState & StoreActions) | null>(null);
 

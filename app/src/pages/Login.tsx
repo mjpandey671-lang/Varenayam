@@ -20,7 +20,7 @@ export default function Login() {
     setError('');
     
     try {
-      const res = await fetch(import.meta.env.DEV ? 'http://localhost:5000/api/auth/login' : '/api/auth/login', {
+      const res = await fetch(import.meta.env.DEV ? 'http://localhost:5000/api/auth/login' : 'https://varenayam-bhnb.vercel.app/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ emailOrMobile, password }),

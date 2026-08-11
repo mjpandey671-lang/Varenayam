@@ -49,7 +49,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch(import.meta.env.DEV ? 'http://localhost:5000/api/admin/stats/users' : '/api/admin/stats/users', {
+        const res = await fetch(import.meta.env.DEV ? 'http://localhost:5000/api/admin/stats/users' : 'https://varenayam-bhnb.vercel.app/api/admin/stats/users', {
           headers: {
             'Authorization': `Bearer ${token}`
           }

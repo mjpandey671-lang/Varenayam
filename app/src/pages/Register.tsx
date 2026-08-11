@@ -26,7 +26,7 @@ export default function Register() {
     setError('');
 
     try {
-      const res = await fetch(import.meta.env.DEV ? 'http://localhost:5000/api/auth/register' : '/api/auth/register', {
+      const res = await fetch(import.meta.env.DEV ? 'http://localhost:5000/api/auth/register' : 'https://varenayam-bhnb.vercel.app/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, mobileNumber, password }),
